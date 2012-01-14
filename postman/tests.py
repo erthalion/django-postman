@@ -35,7 +35,6 @@ import copy
 from datetime import datetime, timedelta
 import re
 import sys
-from time import sleep
 
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
@@ -104,7 +103,7 @@ class BaseTest(TestCase):
         "Check that a date is now. Well... almost."
         delta = dt - datetime.now()
         seconds = delta.days * (24*60*60) + delta.seconds
-        self.assert_(-7 <= seconds <= 2) # consider the sleep() in create()
+        self.assert_(-2 <= seconds <= 1) # -1 is not enough for Mysql
 
     def check_status(self, m, status=STATUS_PENDING, is_new=True, is_replied=False, parent=None, thread=None,
         moderation_date=False, moderation_by=None, moderation_reason='',
@@ -148,10 +147,6 @@ class BaseTest(TestCase):
 
     def create(self, moderation_status=None, *args, **kwargs):
         "Create a message."
-        # need to sleep between creations
-        # otherwise some sent_at datetimes are equal and ordering predictions are disturbed
-        # sleep(0.03) is enough for sqlite but not for mysql ("... microseconds cannot be stored into a column of any temporal data type. Any microseconds part is discarded.")
-        sleep(1)
         if moderation_status:
             kwargs.update(moderation_status=moderation_status)
         return Message.objects.create(subject='s', *args, **kwargs)
@@ -365,9 +360,9 @@ class ViewTest(BaseTest):
         del data['email']
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
-        msgs = list(Message.objects.order_by('pk'))
-        self.check_message(msgs[0])
-        self.check_message(msgs[1], recipient_username='baz')
+        msgs = list(Message.objects.all())
+        self.check_message(msgs[0], recipient_username='baz')
+        self.check_message(msgs[1])
 
         url_with_max = reverse('postman_write_with_max')
         response = self.client.post(url_with_max, data, HTTP_REFERER=url)

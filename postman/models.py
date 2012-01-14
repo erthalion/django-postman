@@ -223,7 +223,7 @@ class Message(models.Model):
     class Meta:
         verbose_name = _("message")
         verbose_name_plural = _("messages")
-        ordering = ['-sent_at']
+        ordering = ['-sent_at', '-id']
 
     def __unicode__(self):
         return u"{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, truncate_words(self.subject,5))
