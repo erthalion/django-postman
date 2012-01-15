@@ -71,6 +71,13 @@ You may specify some additional configuration options in your :file:`settings.py
     Set it to True if you do not allow additional recipients when replying.
 
     *Defaults to*: False.
+
+``POSTMAN_DISABLE_USER_EMAILING``
+    Set it to True if you do not want basic email notification to users.
+    This setting does not apply to visitors (refer to ``POSTMAN_DISALLOW_ANONYMOUS``),
+    nor to a notifier application (refer to ``POSTMAN_NOTIFIER_APP``)
+
+    *Defaults to*: False.
     
 ``POSTMAN_AUTO_MODERATE_AS``
     The default moderation status when no auto-moderation functions, if any, were decisive.
@@ -190,6 +197,7 @@ Examples
     # POSTMAN_DISALLOW_ANONYMOUS = True # default is False
     # POSTMAN_DISALLOW_MULTIRECIPIENTS = True # default is False
     # POSTMAN_DISALLOW_COPIES_ON_REPLY = True # default is False
+    # POSTMAN_DISABLE_USER_EMAILING = True # default is False
     # POSTMAN_AUTO_MODERATE_AS = True # default is None
     # POSTMAN_NOTIFIER_APP = None # default is 'notification'
     # POSTMAN_MAILER_APP = None # default is 'mailer'

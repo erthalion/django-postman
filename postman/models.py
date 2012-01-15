@@ -389,11 +389,14 @@ class Message(models.Model):
                         parent.replied_at = None
                     parent.save()
 
-    def notify_users(self, initial_status):
+    def notify_users(self, initial_status, is_auto_moderated=True):
         """Notify the rejection (to sender) or the acceptance (to recipient) of the message."""
         if initial_status == STATUS_PENDING:
             if self.is_rejected():
-                (notify_user if self.sender_id else email_visitor)(self, 'rejection')
+                # Bypass: for an online user, no need to notify when rejection is immediate.
+                # Only useful for a visitor as an archive copy of the message, otherwise lost.
+                if not (self.sender_id and is_auto_moderated):
+                    (notify_user if self.sender_id else email_visitor)(self, 'rejection')
             elif self.is_accepted():
                 (notify_user if self.recipient_id else email_visitor)(self, 'acceptance')
 

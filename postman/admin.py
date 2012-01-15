@@ -130,7 +130,7 @@ class MessageAdmin(admin.ModelAdmin):
         obj.clean_for_visitor()
         super(MessageAdmin, self).save_model(request, obj, form, change)
         obj.update_parent(form.initial_status)
-        obj.notify_users(form.initial_status)
+        obj.notify_users(form.initial_status, is_auto_moderated=False)
 
 class PendingMessageAdminForm(forms.ModelForm):
     class Meta:

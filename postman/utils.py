@@ -26,6 +26,9 @@ if name and name in settings.INSTALLED_APPS:
 else:
     from django.core.mail import send_mail
 
+# to disable email notification to users
+DISABLE_USER_EMAILING = getattr(settings, 'POSTMAN_DISABLE_USER_EMAILING', False)
+
 # default wrap width; referenced in forms.py
 WRAP_WIDTH = 55
 
@@ -66,11 +69,8 @@ def email(subject_template, message_template, recipient_list, object, action=Non
     # Email subject *must not* contain newlines
     subject = ''.join(subject.splitlines())
     message = render_to_string(message_template, ctx_dict)
-    if settings.DEBUG and getattr(settings, 'DEV_DEBUG', False):
-        print "email from:", settings.DEFAULT_FROM_EMAIL, " - to:", recipient_list, " - subject:", subject
-        print message
-    else:
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
+    # during the development phase, consider using the setting: EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
 
 def email_visitor(object, action):
     """Email a visitor."""
@@ -90,5 +90,5 @@ def notify_user(object, action):
     if notification:
         notification.send(users=[user], label=label, extra_context={'message': object, 'action': action})
     else:
-        if user.email and user.is_active:
+        if not DISABLE_USER_EMAILING and user.email and user.is_active:
             email('postman/email_user_subject.txt', 'postman/email_user.txt', [user.email], object, action)

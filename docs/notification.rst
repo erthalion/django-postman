@@ -26,6 +26,9 @@ and design yours.
 
 For users
 ---------
+Special case: In case of a rejection by the auto moderation feature, the user is immediately aware of it,
+so there is no need for a notification in addition.
+
 If a notifier application is configured (see :ref:`optional_settings`), the following labels are used:
 
 * ``postman_rejection`` to notify the sender of the rejection
