@@ -309,8 +309,8 @@ msgstr "Hai ricevuto una risposta"
 #: .\templates\admin\postman\pendingmessage\change_form.html.py:17
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
-msgstr[0] "Correggi gli errori qui sotto."
-msgstr[1] "Correggi l'errore qui sotto."
+msgstr[0] "Correggi l'errore qui sotto."
+msgstr[1] "Correggi gli errori qui sotto."
 
 #: .\templates\admin\postman\pendingmessage\submit_line.html.py:6
 msgid "Accept"

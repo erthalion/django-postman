@@ -301,8 +301,8 @@ msgstr "U hebt een antwoord ontvangen"
 #: .\templates\admin\postman\pendingmessage\change_form.html.py:17
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
-msgstr[0] "Herstel de fouten hieronder."
-msgstr[1] "Herstel de fout hieronder."
+msgstr[0] "Herstel de fout hieronder."
+msgstr[1] "Herstel de fouten hieronder."
 
 #: .\templates\admin\postman\pendingmessage\submit_line.html.py:6
 msgid "Accept"

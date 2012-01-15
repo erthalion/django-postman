@@ -1,15 +1,17 @@
 # Arabic translation of django-postman.
 # Copyright (C) 2011 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+# Translators:
+# Patrick Samson <maxcom@laposte.net>, 2011.
+#   <eyad.alsibai@gmail.com>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: django-postman 1.0.x\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
 "POT-Creation-Date: 2011-02-07 08:13+0100\n"
 "PO-Revision-Date: 2011-02-07 08:13+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: turbonerd <eyad.alsibai@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -144,7 +146,7 @@ msgstr ""
 
 #: .\models.py:200
 msgid "subject"
-msgstr ""
+msgstr "موضوع"
 
 #: .\models.py:201
 msgid "body"
@@ -152,7 +154,7 @@ msgstr ""
 
 #: .\models.py:202 .\models.py:284
 msgid "sender"
-msgstr ""
+msgstr "مرسل"
 
 #: .\models.py:203 .\models.py:308
 msgid "recipient"
@@ -160,7 +162,7 @@ msgstr ""
 
 #: .\models.py:204
 msgid "visitor"
-msgstr ""
+msgstr "زائر"
 
 #: .\models.py:205
 msgid "parent message"
@@ -200,7 +202,7 @@ msgstr ""
 
 #: .\models.py:215
 msgid "status"
-msgstr ""
+msgstr "حالة"
 
 #: .\models.py:217
 msgid "moderator"
@@ -216,11 +218,11 @@ msgstr ""
 
 #: .\models.py:224
 msgid "message"
-msgstr ""
+msgstr "رسالة"
 
 #: .\models.py:225
 msgid "messages"
-msgstr ""
+msgstr "رسائل"
 
 #: .\models.py:336
 msgid "Undefined sender."
@@ -382,7 +384,7 @@ msgstr ""
 
 #: .\templates\postman\base_folder.html.py:27
 msgid "Subject"
-msgstr ""
+msgstr "موضوع"
 
 #: .\templates\postman\base_folder.html.py:28
 msgid "Date"
