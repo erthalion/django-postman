@@ -267,7 +267,7 @@ class Message(models.Model):
         shrunken_digest = '..'.join((digest[:4], digest[-4:])) # 32 characters is too long and is useless
         bits = email.split('@')
         if len(bits) <> 2:
-            return ''
+            return u''
         domain = bits[1]
         return '@'.join((shrunken_digest, domain.rsplit('.',1)[0])) # leave off the TLD to gain some space
 
@@ -291,7 +291,7 @@ class Message(models.Model):
     def obfuscated_sender(self):
         """Return the sender either as a username or as an undisclosed email."""
         if self.sender:
-            return str(self.sender)
+            return unicode(self.sender)
         else:
             return self._obfuscated_email()
 
@@ -315,7 +315,7 @@ class Message(models.Model):
     def obfuscated_recipient(self):
         """Return the recipient either as a username or as an undisclosed email."""
         if self.recipient:
-            return str(self.recipient)
+            return unicode(self.recipient)
         else:
             return self._obfuscated_email()
 

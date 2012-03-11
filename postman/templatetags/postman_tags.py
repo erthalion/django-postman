@@ -32,7 +32,11 @@ def or_me(value, arg):
     Typical usage: sender|or_me:user
 
     """
-    return _('<me>') if str(value) == str(arg) else value
+    if not isinstance(value, (unicode, str)):
+        value = unicode(value)
+    if not isinstance(arg, (unicode, str)):
+        arg = unicode(arg)
+    return _('<me>') if value == arg else value
 
 @register.filter
 def compact_date(value, arg):
