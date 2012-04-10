@@ -38,7 +38,13 @@ def or_me(value, arg):
         arg = unicode(arg)
     return _('<me>') if value == arg else value
 
-@register.filter
+import django
+if django.VERSION >= (1, 4):
+    date_filter_params = {'expects_localtime':True}
+else:
+    date_filter_params = {}
+
+@register.filter(**date_filter_params)
 def compact_date(value, arg):
     """
     Output a date as short as possible.
