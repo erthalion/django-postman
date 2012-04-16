@@ -1,5 +1,6 @@
 import datetime
 
+from django import VERSION
 from django.http import QueryDict
 from django.template import Node
 from django.template import TemplateSyntaxError
@@ -38,13 +39,7 @@ def or_me(value, arg):
         arg = unicode(arg)
     return _('<me>') if value == arg else value
 
-import django
-if django.VERSION >= (1, 4):
-    date_filter_params = {'expects_localtime':True}
-else:
-    date_filter_params = {}
-
-@register.filter(**date_filter_params)
+@register.filter(**({'expects_localtime': True, 'is_safe': False} if VERSION >= (1, 4) else {}))
 def compact_date(value, arg):
     """
     Output a date as short as possible.
