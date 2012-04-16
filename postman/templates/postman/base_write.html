@@ -3,7 +3,8 @@
 {% block extrahead %}{{ block.super }}
 {% if is_autocompleted %}
 {# using the available admin jQuery is enough #}
-<script type="text/javascript" src="{% load adminmedia %}{% admin_media_prefix %}js/jquery.min.js"></script>
+{# dj v1.4 #}{% load static %}<script type="text/javascript" src="{% static 'admin/js/jquery.min.js' %}"></script>
+{# dj v1.3 #}{# <script type="text/javascript" src="{% load adminmedia %}{% admin_media_prefix %}js/jquery.min.js"></script> #}
 {# <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script> #}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autocomplete.min.js"></script>
 <link href="{{ MEDIA_URL }}css/jquery.autocomplete.css" type="text/css" media="all" rel="stylesheet" />
