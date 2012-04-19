@@ -1,4 +1,3 @@
-import datetime
 import urlparse
 
 from django.conf import settings
@@ -11,6 +10,11 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
+try:
+    from django.utils.timezone import now   # Django 1.4 aware datetimes
+except ImportError:
+    from datetime import datetime
+    now = datetime.now
 
 from postman.fields import is_autocompleted
 from postman.forms import WriteForm, AnonymousWriteForm, QuickReplyForm, FullReplyForm
@@ -286,7 +290,7 @@ def archive(request, *args, **kwargs):
 @login_required
 def delete(request, *args, **kwargs):
     """Mark messages/conversations as deleted."""
-    return _update(request, 'deleted_at', _("Messages or conversations successfully deleted."), datetime.datetime.now(), *args, **kwargs)
+    return _update(request, 'deleted_at', _("Messages or conversations successfully deleted."), now(), *args, **kwargs)
 
 @login_required
 def undelete(request, *args, **kwargs):

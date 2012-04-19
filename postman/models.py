@@ -1,4 +1,3 @@
-import datetime
 import hashlib
 
 from django.conf import settings
@@ -7,6 +6,11 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import truncate_words
 from django.utils.translation import ugettext, ugettext_lazy as _
+try:
+    from django.utils.timezone import now   # Django 1.4 aware datetimes
+except ImportError:
+    from datetime import datetime
+    now = datetime.now
 
 from postman.urls import OPTION_MESSAGES
 from postman.utils import email_visitor, notify_user
@@ -188,7 +192,7 @@ class MessageManager(models.Manager):
             recipient=user,
             moderation_status=STATUS_ACCEPTED,
             read_at__isnull=True,
-        ).update(read_at=datetime.datetime.now())
+        ).update(read_at=now())
 
 class Message(models.Model):
     """
@@ -204,7 +208,7 @@ class Message(models.Model):
     email = models.EmailField(_("visitor"), blank=True) # instead of either sender or recipient, for an AnonymousUser
     parent = models.ForeignKey('self', related_name='next_messages', null=True, blank=True, verbose_name=_("parent message"))
     thread = models.ForeignKey('self', related_name='child_messages', null=True, blank=True, verbose_name=_("root message"))
-    sent_at = models.DateTimeField(_("sent at"), default=datetime.datetime.now)
+    sent_at = models.DateTimeField(_("sent at"), default=now)
     read_at = models.DateTimeField(_("read at"), null=True, blank=True)
     replied_at = models.DateTimeField(_("replied at"), null=True, blank=True)
     sender_archived = models.BooleanField(_("archived by sender"))
@@ -338,11 +342,11 @@ class Message(models.Model):
     def clean_moderation(self, initial_status, user=None):
         """Adjust automatically some fields, according to status workflow."""
         if self.moderation_status <> initial_status:
-            self.moderation_date = datetime.datetime.now()
+            self.moderation_date = now()
             self.moderation_by = user
             if self.is_rejected():
                 # even if maybe previously deleted during a temporary 'accepted' stay
-                self.recipient_deleted_at = datetime.datetime.now()
+                self.recipient_deleted_at = now()
             elif initial_status == STATUS_REJECTED:
                 # rollback
                 self.recipient_deleted_at = None
@@ -352,13 +356,13 @@ class Message(models.Model):
         if not self.sender_id:
             # no need to wait for a final moderation status to mark as deleted
             if not self.sender_deleted_at:
-                self.sender_deleted_at = datetime.datetime.now()
+                self.sender_deleted_at = now()
         elif not self.recipient_id:
             if self.is_accepted():
                 if not self.read_at:
-                    self.read_at = datetime.datetime.now()
+                    self.read_at = now()
                 if not self.recipient_deleted_at:
-                    self.recipient_deleted_at = datetime.datetime.now()
+                    self.recipient_deleted_at = now()
             else:
                 # rollbacks
                 if self.read_at:

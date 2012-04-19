@@ -46,6 +46,12 @@ from django.db.models import Q
 from django.http import QueryDict
 from django.template import Template, Context, TemplateSyntaxError, TemplateDoesNotExist
 from django.test import TestCase
+from django.utils.translation import deactivate
+try:
+    from django.utils.timezone import now   # Django 1.4 aware datetimes
+except ImportError:
+    from datetime import datetime
+    now = datetime.now
 
 from postman.fields import CommaSeparatedUserField
 # because of reload()'s, do "from postman.forms import xxForm" just before needs
@@ -79,6 +85,7 @@ class BaseTest(TestCase):
     urls = 'postman.test_urls'
 
     def setUp(self):
+        deactivate()    # necessary for 1.4 to consider a new settings.LANGUAGE_CODE; 1.3 is fine with or without
         settings.LANGUAGE_CODE = 'en' # do not bother about translation
         for a in (
             'POSTMAN_DISALLOW_ANONYMOUS',
@@ -102,7 +109,7 @@ class BaseTest(TestCase):
 
     def check_now(self, dt):
         "Check that a date is now. Well... almost."
-        delta = dt - datetime.now()
+        delta = dt - now()
         seconds = delta.days * (24*60*60) + delta.seconds
         self.assert_(-2 <= seconds <= 1) # -1 is not enough for Mysql
 
@@ -222,7 +229,7 @@ class ViewTest(BaseTest):
     def test_template(self):
         "Test the 'template_name' parameter."
         m1 = self.c12()
-        m1.read_at, m1.thread = datetime.now(), m1
+        m1.read_at, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
         m1.replied_at = m2.sent_at; m1.save()
         self.assert_(self.client.login(username='foo', password='pass'))
@@ -476,7 +483,7 @@ class ViewTest(BaseTest):
         # existent message but not yet visible to you
         self.check_reply_404(Message.objects.get(pk=self.create(sender=self.user2, recipient=self.user1).pk).pk)
         # cannot reply to a deleted message
-        self.check_reply_404(Message.objects.get(pk=self.c21(recipient_deleted_at=datetime.now()).pk).pk)
+        self.check_reply_404(Message.objects.get(pk=self.c21(recipient_deleted_at=now()).pk).pk)
 
     def test_reply_querystring(self):
         "Test the prefilling by query string."
@@ -633,7 +640,7 @@ class ViewTest(BaseTest):
         "Test permission, what template and form are used, number of messages in the conversation, set-as-read."
         template = "postman/view.html"
         m1 = self.c12()
-        m1.read_at, m1.thread = datetime.now(), m1
+        m1.read_at, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
         m1.replied_at = m2.sent_at; m1.save()
         url = reverse('postman_view_conversation', args=[m1.pk])
@@ -662,7 +669,7 @@ class ViewTest(BaseTest):
         self.check_view_conversation_404(1000)
         # existent conversation but not yours
         m1 = self.c23()
-        m1.read_at, m1.thread = datetime.now(), m1
+        m1.read_at, m1.thread = now(), m1
         m2 = self.c32(parent=m1, thread=m1.thread)
         m1.replied_at = m2.sent_at; m1.save()
         self.check_view_conversation_404(m1.thread_id)
@@ -670,7 +677,7 @@ class ViewTest(BaseTest):
     def test_view_conversation(self):
         "Test message visibility."
         m1 = self.c12()
-        m1.read_at, m1.thread = datetime.now(), m1
+        m1.read_at, m1.thread = now(), m1
         m1.save()
         m2 = self.create(sender=self.user2, recipient=self.user1, parent=m1, thread=m1.thread)
         url = reverse('postman_view_conversation', args=[m1.pk])
@@ -761,7 +768,7 @@ class ViewTest(BaseTest):
     def test_archive_conversation(self):
         "Test archive action on conversations."
         m1 = self.c12()
-        m1.read_at, m1.thread = datetime.now(), m1
+        m1.read_at, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
         m1.replied_at = m2.sent_at; m1.save()
         self.check_update_conversation('postman_archive', m1, 'archived', True)
@@ -777,24 +784,24 @@ class ViewTest(BaseTest):
     def test_delete_conversation(self):
         "Test delete action on conversations."
         m1 = self.c12()
-        m1.read_at, m1.thread = datetime.now(), m1
+        m1.read_at, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
         m1.replied_at = m2.sent_at; m1.save()
         self.check_update_conversation('postman_delete', m1, 'deleted_at', True)
 
     def test_undelete(self):
         "Test undelete action on messages."
-        pk = self.c12(sender_deleted_at=datetime.now()).pk
-        self.c21(recipient_deleted_at=datetime.now())
-        self.c12(sender_deleted_at=datetime.now())
+        pk = self.c12(sender_deleted_at=now()).pk
+        self.c21(recipient_deleted_at=now())
+        self.c12(sender_deleted_at=now())
         self.c13()
         self.check_update('postman_undelete', 'deleted_at', pk)
 
     def test_undelete_conversation(self):
         "Test undelete action on conversations."
-        m1 = self.c12(sender_deleted_at=datetime.now())
-        m1.read_at, m1.thread = datetime.now(), m1
-        m2 = self.c21(parent=m1, thread=m1.thread, recipient_deleted_at=datetime.now())
+        m1 = self.c12(sender_deleted_at=now())
+        m1.read_at, m1.thread = now(), m1
+        m2 = self.c21(parent=m1, thread=m1.thread, recipient_deleted_at=now())
         m1.replied_at = m2.sent_at; m1.save()
         self.check_update_conversation('postman_undelete', m1, 'deleted_at')
 
@@ -883,8 +890,8 @@ class MessageManagerTest(BaseTest):
             return
         pk = self.c12().pk
         self.c21()
-        self.c12(sender_archived=True, recipient_deleted_at=datetime.now())
-        self.c21(sender_archived=True, recipient_deleted_at=datetime.now())
+        self.c12(sender_archived=True, recipient_deleted_at=now())
+        self.c21(sender_archived=True, recipient_deleted_at=now())
         for u in (self.user1, self.user2):
             with self.assertNumQueries(1):
                 msgs = list(Message.objects.sent(u, option=OPTION_MESSAGES))
@@ -923,20 +930,20 @@ class MessageManagerTest(BaseTest):
         """
 
         m1 = self.c12(moderation_status=STATUS_PENDING); 
-        m2 = self.c12(moderation_status=STATUS_REJECTED, recipient_deleted_at=datetime.now())
+        m2 = self.c12(moderation_status=STATUS_REJECTED, recipient_deleted_at=now())
         m3 = self.c12()
-        m3.read_at, m3.thread = datetime.now(), m3
+        m3.read_at, m3.thread = now(), m3
         m4 = self.c21(parent=m3, thread=m3.thread)
         m3.replied_at = m4.sent_at; m3.save()
-        m4.read_at = datetime.now()
+        m4.read_at = now()
         m5 = self.c12(parent=m4, thread=m4.thread)
         m4.replied_at = m5.sent_at; m4.save()
         m6 = self.c12()
         m7 = self.c12()
-        m7.read_at = datetime.now(); m7.save()
+        m7.read_at = now(); m7.save()
         m8 = self.c21()
         m9 = self.c21(moderation_status=STATUS_PENDING)
-        m10 = self.c21(moderation_status=STATUS_REJECTED, recipient_deleted_at=datetime.now())
+        m10 = self.c21(moderation_status=STATUS_REJECTED, recipient_deleted_at=now())
 
         def pk(x): return x.pk
         def pk_cnt(x): return (x.pk, x.count)
@@ -989,13 +996,13 @@ class MessageManagerTest(BaseTest):
               x       X---    X
         """
         m1.sender_archived = True; m1.save()
-        m2.sender_deleted_at = datetime.now(); m2.save()
-        m3.sender_archived, m3.sender_deleted_at = True, datetime.now(); m3.save()
-        m4.sender_archived, m4.sender_deleted_at = True, datetime.now(); m4.save()
+        m2.sender_deleted_at = now(); m2.save()
+        m3.sender_archived, m3.sender_deleted_at = True, now(); m3.save()
+        m4.sender_archived, m4.sender_deleted_at = True, now(); m4.save()
         m6.sender_archived, m6.recipient_archived = True, True; m6.save()
-        m7.recipient_deleted_at = datetime.now(); m7.save()
-        m8.recipient_deleted_at = datetime.now(); m8.save()
-        m9.sender_deleted_at = datetime.now(); m9.save()
+        m7.recipient_deleted_at = now(); m7.save()
+        m8.recipient_deleted_at = now(); m8.save()
+        m9.sender_deleted_at = now(); m9.save()
         m10.sender_archived = True; m10.save()
         self.assertEqual(Message.objects.inbox_unread_count(self.user1), 0)
         self.assertEqual(Message.objects.inbox_unread_count(self.user2), 1)
@@ -1079,15 +1086,15 @@ class MessageTest(BaseTest):
         self.check_status(m, status=STATUS_REJECTED)
         m = Message.objects.create(subject='s', moderation_status=STATUS_ACCEPTED)
         self.check_status(m, status=STATUS_ACCEPTED)
-        m = Message.objects.create(subject='s', read_at=datetime.now())
+        m = Message.objects.create(subject='s', read_at=now())
         self.check_status(m, is_new=False)
-        m = Message.objects.create(subject='s', replied_at=datetime.now())
+        m = Message.objects.create(subject='s', replied_at=now())
         self.check_status(m, is_replied=True)
 
     def test_moderated_count(self):
         "Test 'moderated_messages' count."
         msg = Message.objects.create(subject='s', moderation_status=STATUS_ACCEPTED,
-            moderation_date=datetime.now(), moderation_by=self.user1)
+            moderation_date=now(), moderation_by=self.user1)
         msg.save()
         self.assertEqual(list(self.user1.moderated_messages.all()), [msg])
 
@@ -1115,7 +1122,7 @@ class MessageTest(BaseTest):
 
     def test_moderation_from_rejected(self):
         "Test moderation management when leaving 'rejected' status."
-        date_in_past = datetime.now() - timedelta(days=2) # any value, just to avoid now()
+        date_in_past = now() - timedelta(days=2) # any value, just to avoid now()
         reason = 'some good reason'
         msg = Message.objects.create(subject='s', moderation_status=STATUS_REJECTED,
             moderation_date=date_in_past, moderation_by=self.user1, moderation_reason=reason,
@@ -1144,7 +1151,7 @@ class MessageTest(BaseTest):
 
     def test_moderation_from_accepted(self):
         "Test moderation management when leaving 'accepted' status."
-        date_in_past = datetime.now() - timedelta(days=2) # any value, just to avoid now()
+        date_in_past = now() - timedelta(days=2) # any value, just to avoid now()
         msg = Message.objects.create(subject='s', moderation_status=STATUS_ACCEPTED,
             moderation_date=date_in_past, moderation_by=self.user1, recipient_deleted_at=date_in_past)
         # accepted -> accepted: nothing changes
@@ -1169,7 +1176,7 @@ class MessageTest(BaseTest):
 
     def test_visitor(self):
         "Test clean_for_visitor()."
-        date_in_past = datetime.now() - timedelta(days=2) # any value, just to avoid now()
+        date_in_past = now() - timedelta(days=2) # any value, just to avoid now()
         # as the sender
         m = Message.objects.create(subject='s', recipient=self.user1)
         m.clean_for_visitor()
@@ -1344,7 +1351,7 @@ class MessageTest(BaseTest):
     def test_dates(self):
         "Test set_dates(), get_dates()."
         m = Message()
-        set = datetime.now(), datetime.now(), datetime.now()
+        set = now(), now(), now()
         m.set_dates(*set)
         get = m.get_dates()
         self.assertEqual(get, set)
@@ -1352,7 +1359,7 @@ class MessageTest(BaseTest):
     def test_moderation(self):
         "Test set_moderation(), get_moderation()."
         m = Message()
-        set = STATUS_ACCEPTED, self.user1.pk, datetime.now(), 'some reason'
+        set = STATUS_ACCEPTED, self.user1.pk, now(), 'some reason'
         m.set_moderation(*set)
         get = m.get_moderation()
         self.assertEqual(get, set)
@@ -1370,7 +1377,7 @@ class MessageTest(BaseTest):
             else:
                 changes['status'] = STATUS_REJECTED
                 changes['moderation_reason'] = result
-            m.sent_at = datetime.now() # refresh, as we recycle the same base message
+            m.sent_at = now() # refresh, as we recycle the same base message
             self.check_status(m, **changes)
 
     def test_auto_moderation(self):
@@ -1494,15 +1501,24 @@ class FiltersTest(BaseTest):
     
     def test_compact_date(self):
         "Test '|compact_date'."
-        dt = datetime.now()
-        default = force_unicode(localize(dt)) # as in template/__init__.py/_render_value_in_context()
+        dt = now()
+        try:
+            from django.utils.timezone import localtime # Django 1.4 aware datetimes
+            # (1.4) template/base.py/_render_value_in_context()
+            dt = localtime(dt)
+        except ImportError:
+            pass
+        # (1.2) template/__init__.py/_render_value_in_context()
+        # (1.3) template/base.py/_render_value_in_context()
+        default = force_unicode(localize(dt))
+
         self.check_compact_date(dt, default, format='')
         self.check_compact_date(dt, default, format='one')
         self.check_compact_date(dt, default, format='one,two')
         self.check_compact_date(dt, dt.strftime('%H:%M'))
-        dt = datetime.now() - timedelta(days=1) # little fail: do not work on Jan, 1st, because the year changes as well
+        dt = now() - timedelta(days=1) # little fail: do not work on Jan, 1st, because the year changes as well
         self.check_compact_date(dt, dt.strftime('%d %b').lower()) # filter's 'b' is lowercase
-        dt = datetime.now() - timedelta(days=365)
+        dt = now() - timedelta(days=365)
         self.check_compact_date(dt, dt.strftime('%d/%m/%y'))
 
 class TagsTest(BaseTest):
