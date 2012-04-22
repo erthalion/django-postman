@@ -3,7 +3,10 @@ URLconf for tests.py usage.
 
 """
 from django.conf import settings
-from django.conf.urls.defaults import *
+try:
+    from django.conf.urls import patterns, include, url # django 1.4
+except ImportError:
+    from django.conf.urls.defaults import patterns, include, url # django 1.3
 from django.forms import ValidationError
 from django.views.generic.simple import redirect_to
 

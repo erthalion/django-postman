@@ -86,7 +86,10 @@ Refer to documentation.
     ..., {'formatters': (format_subject,format_body)}, name='postman_view'),
 
 """
-from django.conf.urls.defaults import *
+try:
+    from django.conf.urls import patterns, include, url # django 1.4
+except ImportError:
+    from django.conf.urls.defaults import patterns, include, url # django 1.3
 from django.views.generic.simple import redirect_to
 
 OPTION_MESSAGES = 'm'

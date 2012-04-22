@@ -1,8 +1,13 @@
-import datetime
+from datetime import timedelta
 from optparse import make_option
 
 from django.core.management.base import NoArgsCommand
 from django.db.models import Max, Count, F, Q
+try:
+    from django.utils.timezone import now   # Django 1.4 aware datetimes
+except ImportError:
+    from datetime import datetime
+    now = datetime.now
 
 from postman.models import Message
 
@@ -19,7 +24,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         verbose = int(options.get('verbosity'))
         days = options.get('days')
-        date = datetime.date.today() - datetime.timedelta(days=days)
+        date = now() - timedelta(days=days)
         if verbose >= 1:
             self.stdout.write("Erase messages and conversations marked as deleted before %s\n" % date)
         # for a conversation to be candidate, all messages must satisfy the criteria
