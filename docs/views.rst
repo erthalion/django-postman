@@ -77,7 +77,7 @@ Example::
 
 Example::
 
-    <a href="{% url postman_reply reply_to_pk %}?next={{ next_url|urlencode }}">Reply</a>
+    <a href="{% url 'postman_reply' reply_to_pk %}?next={{ next_url|urlencode }}">Reply</a>
 
 reply formatters
 ----------------

@@ -8,13 +8,13 @@ In the pages of your site, you can put links containing the recipient name(s).
 
 Example::
 
-    <a href="{% url postman_write username %}">write to {{ username }}</a>
+    <a href="{% url 'postman_write' username %}">write to {{ username }}</a>
 
 Separate multiple usernames with a ``:`` character.
 
 Example::
 
-    <a href="{% url postman_write 'adm1:adm2:adm3' %}">write to admins</a>
+    <a href="{% url 'postman_write' 'adm1:adm2:adm3' %}">write to admins</a>
 
 Prefilled fields
 ----------------
@@ -23,7 +23,7 @@ You may prefill the contents of some fields by providing a query string in the l
 
 Example::
 
-    <a href="{% url postman_write %}?subject=details request&body=give me details about ...">
+    <a href="{% url 'postman_write' %}?subject=details request&body=give me details about ...">
     ask for details
     </a>
 
@@ -211,18 +211,29 @@ Example::
         'arg_default': 'postman_users',
     }
 
-Support for multiple recipients is not turned on by default by `django-ajax-selects`_.
-To allow this capability, you have to pass the option ``multiple: true``.
+In case of version 1.1.4/5 of django-ajax-selects:
+
+	Support for multiple recipients is not turned on by default by `django-ajax-selects`_.
+	To allow this capability, you have to pass the option ``multiple: true`` to jquery-plugin-autocomplete.
 
 .. _`django-ajax-selects`: http://code.google.com/p/django-ajax-selects/
 
-Make your own templates, based on these two files, given as implementation examples:
+	Make your own templates, based on these two files, given as implementation examples:
 
-* :file:`postman/templates/autocomplete_postman_multiple.html`
-* :file:`postman/templates/autocomplete_postman_single.html`
+	* :file:`postman/templates/autocomplete_postman_multiple_as1-1.html`
+	* :file:`postman/templates/autocomplete_postman_single_as1-1.html`
 
-These examples include a correction necessary for the support of the 'multiple' option
-(in version 1.1.4 of django-ajax-selects).
+	These examples include a correction necessary for the support of the 'multiple' option.
+
+In case of version 1.2.x of django-ajax-selects:
+
+	Refer to the installation guide of this application, in particular the use of AJAX_SELECT_BOOTSTRAP
+	and AJAX_SELECT_INLINES.
+	Support for multiple recipients is not as simple as an option: see the examples in the `jQuery UI demos`_.
+
+.. _`jQuery UI demos`: http://jqueryui.com/demos/autocomplete/multiple-remote.html
+
+	The directory `postman/templates/` doesn't currently provide any examples for this version.
 
 Customization
 ~~~~~~~~~~~~~

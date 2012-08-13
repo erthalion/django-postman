@@ -135,6 +135,16 @@ A complete set of working templates is provided with the application.
 You may use it as it is with a CSS design of yours, re-use it or extend some parts of it,
 or only view it as an example.
 
+You may need to adjust some templates to match your version of Django.
+Permute the comment tags for the lines denoted by the marks: {# dj v1.x #} in:
+
+* base_write.html
+
+In case you run a Django 1.2 version, perform these additional steps for any template:
+
+* Remove {% load url from future %}
+* Change any {% url 'XX' %} to {% url XX %}
+
 Relations between templates::
 
     base.html
@@ -148,12 +158,18 @@ Relations between templates::
     |  |_ reply.html
     |_ view.html
 
-If the django-ajax-selects application is used, the following URLs are referenced by this set:
+If the autocomplete application is django-ajax-selects in version 1.1.4 or 1.1.5, the following URLs are referenced by this set:
 
-* {% admin_media_prefix %}js/jquery.min.js
-* {{ MEDIA_URL }}js/jquery.autocomplete.min.js
-* {{ MEDIA_URL }}css/jquery.autocomplete.css
-* {{ MEDIA_URL }}css/indicator.gif
+* js/jquery.min.js
+* js/jquery.autocomplete.min.js
+* css/jquery.autocomplete.css
+* css/indicator.gif
+
+You may have to adjust the path prefix with your version of Django:
+{{ MEDIA_URL }} or {{ STATIC_URL }} or {% admin_media_prefix %} or {% static '... %} or {% static 'admin/... %}.
+
+These files are part of the requirements of django-ajax-selects version 1.1.x and
+it's up to you to make them accessible in your project (they are not provided by the django-postman app).
 
 The :file:`postman/base.html` template extends a :file:`base.html` site template,
 in which some blocks are expected:
@@ -163,20 +179,26 @@ in which some blocks are expected:
 * content: in <html><body>, to put the page contents
 * postman_menu: in <html><body>, to put a navigation menu
 
-Medias
-~~~~~~
+Static Files
+~~~~~~~~~~~~
 A CSS file is provided with the application, for the Admin site: :file:`postman/css/admin.css`.
 It is not obligatory but makes the display more confortable.
 
-The file is provided under :file:`postman/medias/`. It's up to you to make it visible to the URL resolver.
+The file is provided under :file:`postman/static/`.
 
-For example:
+For Django 1.3+, just follow the instructions related to the staticfiles app.
 
-* In a production environment, set :file:`/<MEDIA_URL>/postman/` as a symlink to :file:`<Postman_module>/medias/postman/`
-* In a development environment (django's runserver), you can put in the URLconf, something like::
+For Django 1.2:
+	It's up to you to make it visible to the URL resolver.
 
-    ('^' + settings.MEDIA_URL.strip('/') + r'/(?P<path>postman/.*)$', 'django.views.static.serve',
-        {'document_root': os.path.join(imp.find_module('postman')[1], 'medias')}),
+	For example:
+
+	* Rename the path to :file:`postman/medias/`
+	* In a production environment, set :file:`/<MEDIA_ROOT>/postman/` as a symlink to :file:`<Postman_module>/medias/postman/`
+	* In a development environment (django's runserver), you can put in the URLconf, something like::
+
+		('^' + settings.MEDIA_URL.strip('/') + r'/(?P<path>postman/.*)$', 'django.views.static.serve',
+			{'document_root': os.path.join(imp.find_module('postman')[1], 'medias')}),
 
 See also :ref:`styles` for the stylesheets of views.
 

@@ -97,6 +97,7 @@ Contents:
    features
    tags-filters
    management
+   api
    faq
 
 Indices and tables

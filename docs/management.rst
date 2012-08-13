@@ -24,7 +24,7 @@ A management command is provided for this purpose:
 
 It can be run as a cron job or directly.
 
-A :option:`--days` option can be used to specify the minimal number of days a message/conversation
+The :option:`--days` option can be used to specify the minimal number of days a message/conversation
 must have been marked for deletion.
 Default value is 30 days.
 

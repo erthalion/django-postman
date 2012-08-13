@@ -3,8 +3,8 @@ Notification
 
 Parties should be notified of these events:
 
-* when a message is rejected
-* when a message or a reply is received
+* when a message is rejected (sender)
+* when a message or a reply is received (recipient)
 
 .. _for_visitors:
 
@@ -38,8 +38,8 @@ If a notifier application is configured (see :ref:`optional_settings`), the foll
 Some extra context variables are passed in the call to the notifier application
 and so are available in the templates:
 
-* ``message``: the Message instance
-* ``action``: 'rejection' or 'acceptance'
+* ``pm_message``: the Message instance
+* ``pm_action``: 'rejection' or 'acceptance'
 
 If no notifier application is used, an email is sent, using these templates:
 
