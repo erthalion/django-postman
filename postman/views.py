@@ -16,7 +16,7 @@ except ImportError:
     from datetime import datetime
     now = datetime.now
 
-from postman.fields import is_autocompleted
+from postman.fields import autocompleter_app
 from postman.forms import WriteForm, AnonymousWriteForm, QuickReplyForm, FullReplyForm
 from postman.models import Message, get_order_by
 from postman.urls import OPTION_MESSAGES
@@ -148,7 +148,7 @@ def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm)
         form = form_class(initial=initial, channel=channel)
     return render_to_response(template_name, {
         'form': form,
-        'is_autocompleted': is_autocompleted,
+        'autocompleter_app': autocompleter_app,
         'next_url': request.GET.get('next', next_url),
         }, context_instance=RequestContext(request))
 if getattr(settings, 'POSTMAN_DISALLOW_ANONYMOUS', False):
@@ -200,7 +200,7 @@ def reply(request, message_id, form_class=FullReplyForm, formatters=(format_subj
     return render_to_response(template_name, {
         'form': form,
         'recipient': parent.obfuscated_sender,
-        'is_autocompleted': is_autocompleted,
+        'autocompleter_app': autocompleter_app,
         'next_url': request.GET.get('next', next_url),
         }, context_instance=RequestContext(request))
 

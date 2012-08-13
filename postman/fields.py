@@ -97,10 +97,13 @@ field_name = d.get('field', 'AutoCompleteField')
 arg_name = d.get('arg_name', 'channel')
 arg_default = d.get('arg_default') # the minimum to declare to enable the feature
 
+autocompleter_app = {}
 if app_name in settings.INSTALLED_APPS and arg_default:
+    autocompleter_app['is_active'] = True
+    autocompleter_app['name'] = app_name
+    autocompleter_app['version'] = getattr(__import__(app_name, globals(), locals(), ['__version__']), '__version__', None)
     # does something like "from ajax_select.fields import AutoCompleteField"
     auto_complete_field = getattr(__import__(app_name + '.fields', globals(), locals(), [field_name]), field_name)
-    is_autocompleted = True
 
     class CommaSeparatedUserField(BasicCommaSeparatedUserField, auto_complete_field):
         def __init__(self, *args, **kwargs):
@@ -116,5 +119,5 @@ if app_name in settings.INSTALLED_APPS and arg_default:
                 setattr(self.widget, arg_name, value)
 
 else:
+    autocompleter_app['is_active'] = False
     CommaSeparatedUserField = BasicCommaSeparatedUserField
-    is_autocompleted = False

@@ -98,7 +98,7 @@ class BaseTest(TestCase):
                 delattr(settings, a)
         settings.POSTMAN_MAILER_APP = None
         settings.POSTMAN_AUTOCOMPLETER_APP = {
-            'arg_default': 'postman_single', # no default, mandatory to enable the feature
+            'arg_default': 'postman_single_as1-1', # no default, mandatory to enable the feature
         }
         self.reload_modules()
 
@@ -285,13 +285,13 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         f = response.context['form'].fields['recipients']
         if hasattr(f, 'channel'): # app may not be in INSTALLED_APPS
-            self.assertEqual(f.channel, 'postman_single')
+            self.assertEqual(f.channel, 'postman_single_as1-1')
         # authenticated
         self.assert_(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         f = response.context['form'].fields['recipients']
         if hasattr(f, 'channel'):
-            self.assertEqual(f.channel, 'postman_multiple')
+            self.assertEqual(f.channel, 'postman_multiple_as1-1')
 
     def check_init_by_query_string(self, action, args=[]):
         template = "postman/{0}.html".format(action)
@@ -460,7 +460,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         f = response.context['form'].fields['recipients']
         if hasattr(f, 'channel'):
-            self.assertEqual(f.channel, 'postman_multiple')
+            self.assertEqual(f.channel, 'postman_multiple_as1-1')
 
     def check_404(self, view_name, pk):
         "Return is a 404 page."
@@ -1585,3 +1585,66 @@ class UtilsTest(BaseTest):
         self.assertEqual(format_subject("foo bar"), "Re: foo bar")
         self.assertEqual(format_subject("Re: foo bar"), "Re: foo bar")
         self.assertEqual(format_subject("rE: foo bar"), "rE: foo bar")
+
+from postman.api import pm_broadcast, pm_write
+class ApiTest(BaseTest):
+    """
+    Test the API functions.
+    """
+    def check_message(self, m, subject='s', body='b', recipient_username='bar'):
+        "Check some message properties."
+        self.assertEqual(m.subject, subject)
+        self.assertEqual(m.body, body)
+        self.assertEqual(m.email, '')
+        self.assertEqual(m.sender, self.user1)
+        self.assertEqual(m.recipient.username, recipient_username)
+
+    def test_pm_broadcast(self):
+        "Test the case of a single recipient."
+        pm_broadcast(sender=self.user1, recipients=self.user2, subject='s', body='b')
+        m = Message.objects.get()
+        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True,
+            sender_archived=True, sender_deleted_at=True)
+        self.check_now(m.sender_deleted_at)
+        self.check_now(m.moderation_date)
+        self.check_message(m)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_pm_broadcast_skip_notification(self):
+        "Test the notification skipping."
+        pm_broadcast(sender=self.user1, recipients=self.user2, subject='s', skip_notification=True)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_pm_broadcast_multi(self):
+        "Test the case of more than a single recipient."
+        pm_broadcast(sender=self.user1, recipients=[self.user2, self.user3], subject='s', body='b')
+        msgs = list(Message.objects.all())
+        self.check_message(msgs[0], recipient_username='baz')
+        self.check_message(msgs[1])
+
+    def test_pm_write(self):
+        "Test the basic minimal use."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', body='b')
+        m = Message.objects.get()
+        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True)
+        self.check_now(m.moderation_date)
+        self.check_message(m)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_pm_write_skip_notification(self):
+        "Test the notification skipping."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', skip_notification=True)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_pm_write_auto_archive(self):
+        "Test the auto_archive parameter."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_archive=True)
+        m = Message.objects.get()
+        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True, sender_archived=True)
+
+    def test_pm_write_auto_delete(self):
+        "Test the auto_delete parameter."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_delete=True)
+        m = Message.objects.get()
+        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True, sender_deleted_at=True)
+        self.check_now(m.sender_deleted_at)

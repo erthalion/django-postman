@@ -6,7 +6,7 @@ from django.conf import settings
 try:
     from django.conf.urls import patterns, include, url # django 1.4
 except ImportError:
-    from django.conf.urls.defaults import patterns, include, url # django 1.3
+    from django.conf.urls.defaults import * # "patterns, include, url" is enough for django 1.3, "*" for django 1.2
 from django.forms import ValidationError
 from django.views.generic.simple import redirect_to
 
@@ -101,8 +101,8 @@ postman_patterns = patterns('postman.views',
     url(r'^reply_formatters/(?P<message_id>[\d]+)/$', 'reply', {'formatters': (format_subject,format_body)}, name='postman_reply_formatters'),
     url(r'^view_formatters/(?P<message_id>[\d]+)/$', 'view', {'formatters': (format_subject,format_body)}, name='postman_view_formatters'),
     # auto-complete
-    url(r'^write_ac/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'autocomplete_channels': ('postman_multiple', None)}, name='postman_write_auto_complete'),
-    url(r'^reply_ac/(?P<message_id>[\d]+)/$', 'reply', {'autocomplete_channel': 'postman_multiple'}, name='postman_reply_auto_complete'),
+    url(r'^write_ac/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'autocomplete_channels': ('postman_multiple_as1-1', None)}, name='postman_write_auto_complete'),
+    url(r'^reply_ac/(?P<message_id>[\d]+)/$', 'reply', {'autocomplete_channel': 'postman_multiple_as1-1'}, name='postman_reply_auto_complete'),
     # 'template_name'
     url(r'^inbox_template/(?:(?P<option>'+OPTIONS+')/)?$', 'inbox', {'template_name': 'postman/fake.html'}, name='postman_inbox_template'),
     url(r'^sent_template/(?:(?P<option>'+OPTIONS+')/)?$', 'sent', {'template_name': 'postman/fake.html'}, name='postman_sent_template'),
