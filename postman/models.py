@@ -174,6 +174,18 @@ class MessageManager(models.Manager):
             (models.Q(recipient=user) & models.Q(moderation_status=STATUS_ACCEPTED)) | models.Q(sender=user),
         ).order_by('sent_at')
 
+    def as_recipient(self, user, filter):
+        """
+        Return messages matching a filter AND being visible to a user as the recipient.
+        """
+        return self.filter(filter, recipient=user, moderation_status=STATUS_ACCEPTED)
+
+    def as_sender(self, user, filter):
+        """
+        Return messages matching a filter AND being visible to a user as the sender.
+        """
+        return self.filter(filter, sender=user) # any status is fine
+
     def perms(self, user):
         """
         Return a field-lookups filter as a permission controller for a reply request.
