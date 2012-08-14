@@ -226,9 +226,9 @@ def _view(request, filter, form_class=QuickReplyForm, formatters=(format_subject
                 break
         else:
             archived = True
-        # look for the more recent received message, if any
+        # look for the more recent received message (and non-deleted to comply with the future perms() control), if any
         for m in reversed(msgs):
-            if m.recipient == user:
+            if m.recipient == user and not m.recipient_deleted_at:
                 received = m
                 break
         else:
