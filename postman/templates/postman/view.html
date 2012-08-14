@@ -17,7 +17,7 @@
 </div>
 {% if forloop.last %}
 <form action="" method="post">{% csrf_token %}
-<input type="hidden" {% if message.thread_id %}name="tpks" value="{{ message.thread_id }}"{% else %}name="pks" value="{{ message.pk }}"{% endif %} />
+<input type="hidden" {% if pm_messages|length > 1 and message.thread_id %}name="tpks" value="{{ message.thread_id }}"{% else %}name="pks" value="{{ message.pk }}"{% endif %} />
 <a href="{{ next_url }}">{% trans "Back" %}</a>
 <span id="pm_buttons">
 <button type="submit" onclick="this.form.action='{% url 'postman_delete' %}?next={{ next_url|urlencode }}'">{% trans "Delete" %}</button>
