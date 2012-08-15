@@ -179,17 +179,25 @@ in which some blocks are expected:
 * content: in <html><body>, to put the page contents
 * postman_menu: in <html><body>, to put a navigation menu
 
+.. _static files:
+
 Static Files
 ~~~~~~~~~~~~
+
 A CSS file is provided with the application, for the Admin site: :file:`postman/css/admin.css`.
 It is not obligatory but makes the display more confortable.
 
-The file is provided under :file:`postman/static/`.
+A basic CSS file is provided to style the views: :file:`postman/css/postman.css`.
+You may use it as a starting point to make your own design.
+
+These files are provided under :file:`postman/static/`.
+
+See also :ref:`styles` for the stylesheets of views.
 
 For Django 1.3+, just follow the instructions related to the staticfiles app.
 
 For Django 1.2:
-	It's up to you to make it visible to the URL resolver.
+	It's up to you to make the files visible to the URL resolver.
 
 	For example:
 
@@ -199,8 +207,6 @@ For Django 1.2:
 
 		('^' + settings.MEDIA_URL.strip('/') + r'/(?P<path>postman/.*)$', 'django.views.static.serve',
 			{'document_root': os.path.join(imp.find_module('postman')[1], 'medias')}),
-
-See also :ref:`styles` for the stylesheets of views.
 
 Examples
 --------

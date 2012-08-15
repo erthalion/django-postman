@@ -14,6 +14,8 @@ Here is a sample of some CSS rules, usable for :file:`postman/views.html`::
     .pm_message.pm_pending .pm_header  { background-color: #FFC; }
     .pm_message.pm_rejected .pm_header { background-color: #FDD; }
 
+These rules are provided with the application, as an example, in a static file (See :ref:`static files`).
+
 forms
 -----
 

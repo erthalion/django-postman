@@ -5,6 +5,7 @@ Django Postman changelog
 Version 2.0.0, August 2012
 --------------------------
 * Add an API.
+* Add a CSS example, for view.html.
 * Rename the extra context variables passed to the notifier app to avoid name clash:
 	pm_message and pm_action
 * More adjustments for Django 1.4.
