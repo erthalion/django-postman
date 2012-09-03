@@ -233,7 +233,9 @@ In case of version 1.2.x of django-ajax-selects:
 
 .. _`jQuery UI demos`: http://jqueryui.com/demos/autocomplete/multiple-remote.html
 
-	The directory `postman/templates/` doesn't currently provide any examples for this version.
+	You can use the following working implementation example:
+
+	* :file:`postman/templates/autocomplete_postman_multiple_as1-2.html`
 
 Customization
 ~~~~~~~~~~~~~
