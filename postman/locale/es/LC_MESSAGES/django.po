@@ -1,21 +1,25 @@
 # Spanish translation of django-postman.
 # Copyright (C) 2010 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
-# erik_river <erik.river@gmail.com>, 2011.
+#
+# Translators:
+# Patrick Samson <maxcom@laposte.net>, 2011.
+# Erik Rivera <erik.river@gmail.com>, 2011.
+# <matiasherranz@gmail.com>, 2012.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: django-postman 1.0.x\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
 "POT-Creation-Date: 2010-12-27 15:16+0100\n"
-"PO-Revision-Date: 2011-03-30 20:47+0000\n"
-"Last-Translator: erik_river <erik.river@gmail.com>\n"
+"PO-Revision-Date: 2012-10-19 14:04+0000\n"
+"Last-Translator: matiasherranz <matiasherranz@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\admin.py:22
 msgid "Sender and Recipient cannot be both undefined."
@@ -422,7 +426,7 @@ msgstr "Estimado usuario,"
 #: .\templates\postman\email_visitor.txt.py:3
 #, python-format
 msgid "On %(date)s, you asked to send a message to the user '%(recipient)s'."
-msgstr ""
+msgstr "En la fecha %(date)s, solicitaste que se envíe un mensaje al usuario '%(recipient)s'."
 
 #: .\templates\postman\email_user.txt.py:5
 #: .\templates\postman\email_visitor.txt.py:5
@@ -438,7 +442,7 @@ msgstr ", por las siguientes razones:"
 #: .\templates\postman\email_visitor.txt.py:10
 #, python-format
 msgid "On %(date)s, you sent a message to the user '%(sender)s'."
-msgstr ""
+msgstr "En la fecha %(date)s, enviaste un mensaje al usuario '%(sender)s'."
 
 #: .\templates\postman\email_user.txt.py:10
 msgid "Your correspondent has given you an answer."
@@ -523,7 +527,7 @@ msgstr "Mensajes eliminados"
 msgid ""
 "Messages in this folder can be removed from time to time. For long term "
 "storage, use instead the archive folder."
-msgstr ""
+msgstr "Los mensajes en esta carpeta pueden ser borrados de tanto en tanto. No utilice esta carpeta para almacenamiento a largo plazo."
 
 #: .\templates\postman\view.html.py:5
 msgid "Conversation"
