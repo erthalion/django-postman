@@ -61,16 +61,6 @@ from postman.urls import OPTION_MESSAGES
 # because of reload()'s, do "from postman.utils import notification" just before needs
 from postman.utils import format_body, format_subject
 
-if not 'pagination' in settings.INSTALLED_APPS:
-    try:
-        import postman.templatetags.pagination_tags
-    except:
-        sys.exit(
-            "Some templates need templatetags from the django-pagination application.\n"
-            "Add it to the INSTALLED_APPS, or allow a mock by renaming\n"
-            "postman/templatetags/pagination_tags_for_tests.py to pagination_tags.py"
-        )
-
 class GenericTest(TestCase):
     """
     Usual generic tests.

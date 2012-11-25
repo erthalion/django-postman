@@ -11,9 +11,12 @@ that are not intended for your site design:
 * :file:`postman_admin_modify.py`: a library exclusively designed for a customized change_form
   template used in the Admin site for the moderation of pending messages.
 
-* :file:`pagination_tags_for_tests.py`: a mock of the django-pagination application template tags,
-  only usable for the test suite in case the real application is not installed.
-  To rename to :file:`pagination_tags.py` during the test session.
+* :file:`pagination_tags.py`: a mock of the django-pagination application template tags.
+  For convenience, the design of the default template set is done with the use of that application.
+  The mock will avoid failures in template rendering if the real application is not installed,
+  as it may be the case for the test suite run in a minimal configuration.
+  To deactivate the mock and use the real implementation, just make sure that ``pagination`` is declared
+  before ``postman`` in the ``INSTALLED_APPS`` setting.
 
 Tags
 ----
