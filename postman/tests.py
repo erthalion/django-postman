@@ -86,7 +86,7 @@ class BaseTest(TestCase):
 
     def setUp(self):
         deactivate()    # necessary for 1.4 to consider a new settings.LANGUAGE_CODE; 1.3 is fine with or without
-        settings.LANGUAGE_CODE = 'en' # do not bother about translation
+        settings.LANGUAGE_CODE = 'en'  # do not bother about translation
         for a in (
             'POSTMAN_DISALLOW_ANONYMOUS',
             'POSTMAN_DISALLOW_MULTIRECIPIENTS',
@@ -98,7 +98,7 @@ class BaseTest(TestCase):
                 delattr(settings, a)
         settings.POSTMAN_MAILER_APP = None
         settings.POSTMAN_AUTOCOMPLETER_APP = {
-            'arg_default': 'postman_single_as1-1', # no default, mandatory to enable the feature
+            'arg_default': 'postman_single_as1-1',  # no default, mandatory to enable the feature
         }
         self.reload_modules()
 
@@ -111,7 +111,7 @@ class BaseTest(TestCase):
         "Check that a date is now. Well... almost."
         delta = dt - now()
         seconds = delta.days * (24*60*60) + delta.seconds
-        self.assert_(-2 <= seconds <= 1) # -1 is not enough for Mysql
+        self.assert_(-2 <= seconds <= 1)  # -1 is not enough for Mysql
 
     def check_status(self, m, status=STATUS_PENDING, is_new=True, is_replied=False, parent=None, thread=None,
         moderation_date=False, moderation_by=None, moderation_reason='',
@@ -183,7 +183,7 @@ class BaseTest(TestCase):
             reload(sys.modules['postman.forms'])
             reload(sys.modules['postman.views'])
             reload(sys.modules['postman.urls'])
-        except KeyError: # happens once at the setUp
+        except KeyError:  # happens once at the setUp
             pass
         reload(get_resolver(get_urlconf()).urlconf_module)
     
@@ -284,7 +284,7 @@ class ViewTest(BaseTest):
         # anonymous
         response = self.client.get(url)
         f = response.context['form'].fields['recipients']
-        if hasattr(f, 'channel'): # app may not be in INSTALLED_APPS
+        if hasattr(f, 'channel'):  # app may not be in INSTALLED_APPS
             self.assertEqual(f.channel, 'postman_single_as1-1')
         # authenticated
         self.assert_(self.client.login(username='foo', password='pass'))
@@ -632,7 +632,7 @@ class ViewTest(BaseTest):
         # invalid message id
         self.check_view_404(1000)
         # existent message but not yours
-        self.check_view_404(Message.objects.get(pk=self.c23().pk).pk) # create & verify really there
+        self.check_view_404(Message.objects.get(pk=self.c23().pk).pk)  # create & verify really there
         # existent message but not yet visible to you
         self.check_view_404(Message.objects.get(pk=self.create(sender=self.user2, recipient=self.user1).pk).pk)
 
@@ -713,7 +713,7 @@ class ViewTest(BaseTest):
         self.check_status(Message.objects.get(pk=pk+2), status=STATUS_ACCEPTED, **{sender_kw: field_value})
         self.check_status(Message.objects.get(pk=pk+3), status=STATUS_ACCEPTED)
         # fallback redirect is to inbox
-        response = self.client.post(url, data) # doesn't hurt if already archived|deleted|undeleted
+        response = self.client.post(url, data)  # doesn't hurt if already archived|deleted|undeleted
         self.assertRedirects(response, reverse('postman_inbox'))
         # redirect url may be superseded
         response = self.client.post(url_with_success_url, data, HTTP_REFERER=redirect_url)
@@ -1108,7 +1108,7 @@ class MessageTest(BaseTest):
         # pending -> rejected
         m = copy.copy(msg)
         m.moderation_status = STATUS_REJECTED
-        m.clean_moderation(STATUS_PENDING, self.user1) # one try with moderator
+        m.clean_moderation(STATUS_PENDING, self.user1)  # one try with moderator
         self.check_status(m, status=STATUS_REJECTED,
             moderation_date=True, moderation_by=self.user1, recipient_deleted_at=True)
         self.check_now(m.moderation_date)
@@ -1116,13 +1116,13 @@ class MessageTest(BaseTest):
         # pending -> accepted
         m = copy.copy(msg)
         m.moderation_status = STATUS_ACCEPTED
-        m.clean_moderation(STATUS_PENDING) # one try without moderator
+        m.clean_moderation(STATUS_PENDING)  # one try without moderator
         self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True)
         self.check_now(m.moderation_date)
 
     def test_moderation_from_rejected(self):
         "Test moderation management when leaving 'rejected' status."
-        date_in_past = now() - timedelta(days=2) # any value, just to avoid now()
+        date_in_past = now() - timedelta(days=2)  # any value, just to avoid now()
         reason = 'some good reason'
         msg = Message.objects.create(subject='s', moderation_status=STATUS_REJECTED,
             moderation_date=date_in_past, moderation_by=self.user1, moderation_reason=reason,
@@ -1136,14 +1136,14 @@ class MessageTest(BaseTest):
         # rejected -> pending
         m = copy.copy(msg)
         m.moderation_status = STATUS_PENDING
-        m.clean_moderation(STATUS_REJECTED) # one try without moderator
+        m.clean_moderation(STATUS_REJECTED)  # one try without moderator
         self.check_status(m, status=STATUS_PENDING,
             moderation_date=True, moderation_reason=reason, recipient_deleted_at=False)
         self.check_now(m.moderation_date)
         # rejected -> accepted
         m = copy.copy(msg)
         m.moderation_status = STATUS_ACCEPTED
-        m.clean_moderation(STATUS_REJECTED, self.user2) # one try with moderator
+        m.clean_moderation(STATUS_REJECTED, self.user2)  # one try with moderator
         self.check_status(m, status=STATUS_ACCEPTED,
             moderation_date=True, moderation_by=self.user2, moderation_reason=reason,
             recipient_deleted_at=False)
@@ -1151,7 +1151,7 @@ class MessageTest(BaseTest):
 
     def test_moderation_from_accepted(self):
         "Test moderation management when leaving 'accepted' status."
-        date_in_past = now() - timedelta(days=2) # any value, just to avoid now()
+        date_in_past = now() - timedelta(days=2)  # any value, just to avoid now()
         msg = Message.objects.create(subject='s', moderation_status=STATUS_ACCEPTED,
             moderation_date=date_in_past, moderation_by=self.user1, recipient_deleted_at=date_in_past)
         # accepted -> accepted: nothing changes
@@ -1162,21 +1162,21 @@ class MessageTest(BaseTest):
         # accepted -> pending
         m = copy.copy(msg)
         m.moderation_status = STATUS_PENDING
-        m.clean_moderation(STATUS_ACCEPTED, self.user2) # one try with moderator
+        m.clean_moderation(STATUS_ACCEPTED, self.user2)  # one try with moderator
         self.check_status(m, status=STATUS_PENDING,
             moderation_date=True, moderation_by=self.user2, recipient_deleted_at=date_in_past)
         self.check_now(m.moderation_date)
         # accepted -> rejected
         m = copy.copy(msg)
         m.moderation_status = STATUS_REJECTED
-        m.clean_moderation(STATUS_ACCEPTED) # one try without moderator
+        m.clean_moderation(STATUS_ACCEPTED)  # one try without moderator
         self.check_status(m, status=STATUS_REJECTED, moderation_date=True, recipient_deleted_at=True)
         self.check_now(m.moderation_date)
         self.check_now(m.recipient_deleted_at)
 
     def test_visitor(self):
         "Test clean_for_visitor()."
-        date_in_past = now() - timedelta(days=2) # any value, just to avoid now()
+        date_in_past = now() - timedelta(days=2)  # any value, just to avoid now()
         # as the sender
         m = Message.objects.create(subject='s', recipient=self.user1)
         m.clean_for_visitor()
@@ -1228,9 +1228,9 @@ class MessageTest(BaseTest):
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent)
         # pending -> accepted: parent is replied
         r.update_parent(STATUS_PENDING)
-        p = Message.objects.get(pk=parent.pk) # better to ask the DB to check the save()
+        p = Message.objects.get(pk=parent.pk)  # better to ask the DB to check the save()
         self.check_status(p, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        self.assertEqual(p.replied_at.timetuple(), r.sent_at.timetuple()) # mysql doesn't store microseconds
+        self.assertEqual(p.replied_at.timetuple(), r.sent_at.timetuple())  # mysql doesn't store microseconds
         # rejected -> accepted: same as pending -> accepted
         # so check here the acceptance of an anterior date
         # note: use again the some object for convenience but another reply is more realistic
@@ -1243,7 +1243,7 @@ class MessageTest(BaseTest):
         # a reply is withdrawn and no other reply
         r = copy.deepcopy(reply)
         r.parent.replied_at = r.sent_at
-        r.moderation_status = STATUS_REJECTED # could be STATUS_PENDING
+        r.moderation_status = STATUS_REJECTED  # could be STATUS_PENDING
         # rejected -> rejected: no change. In real case, parent.replied_at would be already empty
         r.update_parent(STATUS_REJECTED)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
@@ -1262,7 +1262,7 @@ class MessageTest(BaseTest):
             parent=parent, thread=parent.thread, moderation_status=STATUS_ACCEPTED)
         r = copy.deepcopy(reply)
         r.parent.replied_at = r.sent_at
-        r.moderation_status = STATUS_PENDING # could be STATUS_REJECTED
+        r.moderation_status = STATUS_PENDING  # could be STATUS_REJECTED
         # pending -> pending: no change. In real case, parent.replied_at would be from another reply object
         r.update_parent(STATUS_PENDING)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
@@ -1377,7 +1377,7 @@ class MessageTest(BaseTest):
             else:
                 changes['status'] = STATUS_REJECTED
                 changes['moderation_reason'] = result
-            m.sent_at = now() # refresh, as we recycle the same base message
+            m.sent_at = now()  # refresh, as we recycle the same base message
             self.check_status(m, **changes)
 
     def test_auto_moderation(self):
@@ -1485,7 +1485,7 @@ class FiltersTest(BaseTest):
         self.check_sub("'X'", '2', 'X')
 
     def check_or_me(self, x, value, user=None):
-        t = Template("{% load postman_tags %}{{ "+x+"|or_me:user }}") # do not load i18n to be able to check the untranslated pattern
+        t = Template("{% load postman_tags %}{{ "+x+"|or_me:user }}")  # do not load i18n to be able to check the untranslated pattern
         self.assertEqual(t.render(Context({'user': user or AnonymousUser()})), value)
 
     def test_or_me(self):
@@ -1503,7 +1503,7 @@ class FiltersTest(BaseTest):
         "Test '|compact_date'."
         dt = now()
         try:
-            from django.utils.timezone import localtime # Django 1.4 aware datetimes
+            from django.utils.timezone import localtime  # Django 1.4 aware datetimes
             # (1.4) template/base.py/_render_value_in_context()
             dt = localtime(dt)
         except ImportError:
@@ -1516,8 +1516,8 @@ class FiltersTest(BaseTest):
         self.check_compact_date(dt, default, format='one')
         self.check_compact_date(dt, default, format='one,two')
         self.check_compact_date(dt, dt.strftime('%H:%M'))
-        dt = now() - timedelta(days=1) # little fail: do not work on Jan, 1st, because the year changes as well
-        self.check_compact_date(dt, dt.strftime('%d %b').lower()) # filter's 'b' is lowercase
+        dt = now() - timedelta(days=1)  # little fail: do not work on Jan, 1st, because the year changes as well
+        self.check_compact_date(dt, dt.strftime('%d %b').lower())  # filter's 'b' is lowercase
         dt = now() - timedelta(days=365)
         self.check_compact_date(dt, dt.strftime('%d/%m/%y'))
 
@@ -1629,7 +1629,7 @@ class ApiTest(BaseTest):
         self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True)
         self.check_now(m.moderation_date)
         self.check_message(m)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 1)  # notify the recipient
 
     def test_pm_write_skip_notification(self):
         "Test the notification skipping."
@@ -1648,3 +1648,25 @@ class ApiTest(BaseTest):
         m = Message.objects.get()
         self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True, sender_deleted_at=True)
         self.check_now(m.sender_deleted_at)
+
+    def test_pm_write_auto_moderators_accepted(self):
+        "Test the auto_moderators parameter, moderate as accepted."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_moderators=lambda m: True)
+        m = Message.objects.get()
+        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True)
+
+    def test_pm_write_auto_moderators_pending(self):
+        "Test the auto_moderators parameter, no moderation decision is taken. Test the parameter as a list."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_moderators=[lambda m: None])
+        m = Message.objects.get()
+        self.check_status(m)
+        self.assertEqual(len(mail.outbox), 0)  # no one to notify
+
+    def test_pm_write_auto_moderators_rejected(self):
+        "Test the auto_moderators parameter, moderate as rejected. Test the parameter as a tuple."
+        pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_moderators=(lambda m: False, ))
+        m = Message.objects.get()
+        self.check_status(m, status=STATUS_REJECTED, moderation_date=True, recipient_deleted_at=True)
+        self.check_now(m.moderation_date)
+        self.check_now(m.recipient_deleted_at)
+        self.assertEqual(len(mail.outbox), 0)  # sender is not notified in the case of auto moderation
