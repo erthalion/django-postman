@@ -46,20 +46,25 @@ from django.db.models import Q
 from django.http import QueryDict
 from django.template import Template, Context, TemplateSyntaxError, TemplateDoesNotExist
 from django.test import TestCase
+from django.utils.encoding import force_unicode
+from django.utils.formats import localize
 from django.utils.translation import deactivate
 try:
-    from django.utils.timezone import now   # Django 1.4 aware datetimes
+    from django.utils.timezone import now  # Django 1.4 aware datetimes
 except ImportError:
     from datetime import datetime
     now = datetime.now
 
+from postman.api import pm_broadcast, pm_write
 from postman.fields import CommaSeparatedUserField
 # because of reload()'s, do "from postman.forms import xxForm" just before needs
 from postman.models import ORDER_BY_KEY, ORDER_BY_MAPPER, Message, PendingMessage,\
-    STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED
+    STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED,\
+    get_user_representation
 from postman.urls import OPTION_MESSAGES
 # because of reload()'s, do "from postman.utils import notification" just before needs
 from postman.utils import format_body, format_subject
+
 
 class GenericTest(TestCase):
     """
@@ -68,6 +73,7 @@ class GenericTest(TestCase):
     def test_version(self):
         self.assertEqual(sys.modules['postman'].__version__, "2.1.0a1")
 
+
 class BaseTest(TestCase):
     """
     Common configuration and helper functions for all tests.
@@ -75,7 +81,7 @@ class BaseTest(TestCase):
     urls = 'postman.test_urls'
 
     def setUp(self):
-        deactivate()    # necessary for 1.4 to consider a new settings.LANGUAGE_CODE; 1.3 is fine with or without
+        deactivate()  # necessary for 1.4 to consider a new settings.LANGUAGE_CODE; 1.3 is fine with or without
         settings.LANGUAGE_CODE = 'en'  # do not bother about translation
         for a in (
             'POSTMAN_DISALLOW_ANONYMOUS',
@@ -83,6 +89,7 @@ class BaseTest(TestCase):
             'POSTMAN_DISALLOW_COPIES_ON_REPLY',
             'POSTMAN_DISABLE_USER_EMAILING',
             'POSTMAN_AUTO_MODERATE_AS',
+            'POSTMAN_SHOW_USER_AS',
         ):
             if hasattr(settings, a):
                 delattr(settings, a)
@@ -176,7 +183,8 @@ class BaseTest(TestCase):
         except KeyError:  # happens once at the setUp
             pass
         reload(get_resolver(get_urlconf()).urlconf_module)
-    
+
+
 class ViewTest(BaseTest):
     """
     Test the views.
@@ -795,6 +803,7 @@ class ViewTest(BaseTest):
         m1.replied_at = m2.sent_at; m1.save()
         self.check_update_conversation('postman_undelete', m1, 'deleted_at')
 
+
 class FieldTest(BaseTest):
     """
     Test the CommaSeparatedUserField.
@@ -869,6 +878,7 @@ class FieldTest(BaseTest):
         self.assertEqual(f.clean('foo'), [self.user1])
         self.assertRaises(ValidationError, f.clean, 'foo, bar')
 
+
 class MessageManagerTest(BaseTest):
     """
     Test the Message manager.
@@ -913,13 +923,13 @@ class MessageManagerTest(BaseTest):
                   |<------|             x    x
                   |------>
                    ------>
-                   ------>              x    
-                   <------              
+                   ------>              x
+                   <------
                     ...---
               x       X---
         """
 
-        m1 = self.c12(moderation_status=STATUS_PENDING); 
+        m1 = self.c12(moderation_status=STATUS_PENDING);
         m2 = self.c12(moderation_status=STATUS_REJECTED, recipient_deleted_at=now())
         m3 = self.c12()
         m3.read_at, m3.thread = now(), m3
@@ -980,8 +990,8 @@ class MessageManagerTest(BaseTest):
                   |<------|   X    X    x    x
                   |------>
          X         ------>    X
-                   ------>         X    x    
-              X    <------              
+                   ------>         X    x
+              X    <------
                     ...---         X
               x       X---    X
         """
@@ -1028,6 +1038,7 @@ class MessageManagerTest(BaseTest):
         m = Message.objects.get(pk=m8.pk)
         self.check_status(m, status=STATUS_ACCEPTED, is_new=False, recipient_deleted_at=True)
         self.check_now(m.read_at)
+
 
 class MessageTest(BaseTest):
     """
@@ -1242,7 +1253,7 @@ class MessageTest(BaseTest):
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
         # accepted -> rejected: parent is no more replied
         r.update_parent(STATUS_ACCEPTED)
-        p = Message.objects.get(pk=parent.pk) 
+        p = Message.objects.get(pk=parent.pk)
         self.check_status(p, status=STATUS_ACCEPTED, thread=parent)
         # note: accepted -> rejected, with the existence of another suitable reply
         # is covered in the accepted -> pending case
@@ -1256,7 +1267,7 @@ class MessageTest(BaseTest):
         # pending -> pending: no change. In real case, parent.replied_at would be from another reply object
         r.update_parent(STATUS_PENDING)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        # rejected -> pending: no change. In real case, parent.replied_at would be from another reply object 
+        # rejected -> pending: no change. In real case, parent.replied_at would be from another reply object
         r.update_parent(STATUS_REJECTED)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
         # accepted -> pending: parent is still replied but by another object
@@ -1273,7 +1284,7 @@ class MessageTest(BaseTest):
         self.assertEqual(len(mail.outbox), mail_number)
         if mail_number:
             self.assertEqual(mail.outbox[0].to, [email])
-        from utils import notification
+        from postman.utils import notification
         if notification and notice_label:
             notice = notification.Notice.objects.get()
             self.assertEqual(notice.notice_type.label, notice_label)
@@ -1435,6 +1446,7 @@ class MessageTest(BaseTest):
         settings.POSTMAN_AUTO_MODERATE_AS = False
         self.check_auto_moderation(msg, seq, STATUS_REJECTED)
 
+
 class PendingMessageManagerTest(BaseTest):
     """
     Test the PendingMessage manager.
@@ -1445,6 +1457,7 @@ class PendingMessageManagerTest(BaseTest):
         msg3 = self.create(moderation_status=STATUS_ACCEPTED)
         msg4 = self.create()
         self.assertQuerysetEqual(PendingMessage.objects.all(), [msg4.pk, msg1.pk], transform=lambda x: x.pk)
+
 
 class PendingMessageTest(BaseTest):
     """
@@ -1458,8 +1471,7 @@ class PendingMessageTest(BaseTest):
         m.set_rejected()
         self.assert_(m.is_rejected())
 
-from django.utils.encoding import force_unicode
-from django.utils.formats import localize
+
 class FiltersTest(BaseTest):
     """
     Test the filters.
@@ -1474,21 +1486,28 @@ class FiltersTest(BaseTest):
         self.check_sub('6', "'X'", '6')
         self.check_sub("'X'", '2', 'X')
 
-    def check_or_me(self, x, value, user=None):
+    def check_or_me(self, x, value, user=None, m=None):
         t = Template("{% load postman_tags %}{{ "+x+"|or_me:user }}")  # do not load i18n to be able to check the untranslated pattern
-        self.assertEqual(t.render(Context({'user': user or AnonymousUser()})), value)
+        self.assertEqual(t.render(Context({'user': user or AnonymousUser(), 'message': m})), value)
 
     def test_or_me(self):
         "Test '|or_me'."
         self.check_or_me("'foo'", 'foo')
         self.check_or_me("'foo'", '&lt;me&gt;', self.user1)
         self.check_or_me("'bar'", 'bar', self.user1)
+        self.check_or_me("user", '&lt;me&gt;', self.user1)
+        m = self.c12()
+        self.check_or_me("message.obfuscated_sender", '&lt;me&gt;', self.user1, m=m)
+        self.check_or_me("message.obfuscated_recipient", 'bar', self.user1, m=m)
+        settings.POSTMAN_SHOW_USER_AS = 'email'
+        self.check_or_me("message.obfuscated_sender", '&lt;me&gt;', self.user1, m=m)
+        self.check_or_me("message.obfuscated_recipient", 'bar@domain.com', self.user1, m=m)
 
     def check_compact_date(self, date, value, format='H:i,d b,d/m/y'):
         # use 'H', 'd', 'm' instead of 'G', 'j', 'n' because no strftime equivalents
         t = Template('{% load postman_tags %}{{ date|compact_date:"'+format+'" }}')
         self.assertEqual(t.render(Context({'date': date})), value)
-    
+
     def test_compact_date(self):
         "Test '|compact_date'."
         dt = now()
@@ -1510,6 +1529,7 @@ class FiltersTest(BaseTest):
         self.check_compact_date(dt, dt.strftime('%d %b').lower())  # filter's 'b' is lowercase
         dt = now() - timedelta(days=365)
         self.check_compact_date(dt, dt.strftime('%d/%m/%y'))
+
 
 class TagsTest(BaseTest):
     """
@@ -1534,7 +1554,7 @@ class TagsTest(BaseTest):
         self.assertEqual(ctx['var'], 1)
         self.assertRaises(TemplateSyntaxError, self.check_postman_unread, '', self.user1, 'as var extra')
         self.assertRaises(TemplateSyntaxError, self.check_postman_unread, '', self.user1, 'As var')
-    
+
     def check_order_by(self, keyword, value_list, context=None):
         t = Template("{% load postman_tags %}{% postman_order_by " + keyword +" %}")
         r = t.render(Context({'gets': QueryDict(context)} if context else {}))
@@ -1552,6 +1572,7 @@ class TagsTest(BaseTest):
         self.assertRaises(TemplateSyntaxError, self.check_order_by, '', None)
         self.assertRaises(TemplateSyntaxError, self.check_order_by, 'subject extra', None)
         self.assertRaises(TemplateSyntaxError, self.check_order_by, 'unknown', None)
+
 
 class UtilsTest(BaseTest):
     """
@@ -1576,7 +1597,29 @@ class UtilsTest(BaseTest):
         self.assertEqual(format_subject("Re: foo bar"), "Re: foo bar")
         self.assertEqual(format_subject("rE: foo bar"), "rE: foo bar")
 
-from postman.api import pm_broadcast, pm_write
+    def test_get_user_representation(self):
+        "Test get_user_representation()."
+        # no setting
+        self.assertEqual(get_user_representation(self.user1), "foo")
+        # a wrong setting
+        settings.POSTMAN_SHOW_USER_AS = 'unknown_attribute'
+        self.assertEqual(get_user_representation(self.user1), "foo")
+        # a valid setting but an empty attribute
+        settings.POSTMAN_SHOW_USER_AS = 'first_name'
+        self.assertEqual(get_user_representation(self.user1), "foo")
+        # a property name
+        settings.POSTMAN_SHOW_USER_AS = 'email'
+        self.assertEqual(get_user_representation(self.user1), "foo@domain.com")
+        settings.POSTMAN_SHOW_USER_AS = b'email'
+        self.assertEqual(get_user_representation(self.user1), "foo@domain.com")
+        # a method name
+        settings.POSTMAN_SHOW_USER_AS = 'get_absolute_url'  # can't use get_full_name(), an empty string in our case
+        self.assertEqual(get_user_representation(self.user1), "/users/foo/")
+        # a function
+        settings.POSTMAN_SHOW_USER_AS = lambda u: u.get_absolute_url()
+        self.assertEqual(get_user_representation(self.user1), "/users/foo/")
+
+
 class ApiTest(BaseTest):
     """
     Test the API functions.

@@ -78,7 +78,7 @@ You may specify some additional configuration options in your :file:`settings.py
     nor to a notifier application (refer to ``POSTMAN_NOTIFIER_APP``)
 
     *Defaults to*: False.
-    
+
 ``POSTMAN_AUTO_MODERATE_AS``
     The default moderation status when no auto-moderation functions, if any, were decisive.
 
@@ -92,6 +92,21 @@ You may specify some additional configuration options in your :file:`settings.py
 
     * Set this option to True
     * Do not provide any auto-moderation functions
+
+``POSTMAN_SHOW_USER_AS``
+    How to represent a User for display, in message properties: ``obfuscated_recipient`` and ``obfuscated_sender``,
+    and in the ``or_me`` filter. The value can be specified as:
+
+    * The name of a property of User. For example: 'last_name'
+    * The name of a method of User. For example: 'get_full_name'
+    * A function, receiving the User instance as the only parameter. For example: lambda u: u.get_profile().nickname
+    * ``None`` : the default text representation of the User (username) is used.
+
+    *Defaults to*: None.
+
+    The default behaviour is used as a fallback when: the value is a string and the result is false
+    (misspelled attribute name, empty result, ...), or the value is a function and an exception is raised
+    (but any result, even empty, is valid).
 
 ``POSTMAN_NOTIFIER_APP``
     A notifier application name, used in preference to the basic emailing,
@@ -214,27 +229,28 @@ Examples
 :file:`settings.py`::
 
     INSTALLED_APPS = (
+        # 'pagination'  # has to be before postman
         # ...
         'postman',
         # ...
-        # 'pagination'
         # 'ajax_select'
         # 'notification'
         # 'mailer'
     )
-    # POSTMAN_DISALLOW_ANONYMOUS = True # default is False
-    # POSTMAN_DISALLOW_MULTIRECIPIENTS = True # default is False
-    # POSTMAN_DISALLOW_COPIES_ON_REPLY = True # default is False
-    # POSTMAN_DISABLE_USER_EMAILING = True # default is False
-    # POSTMAN_AUTO_MODERATE_AS = True # default is None
-    # POSTMAN_NOTIFIER_APP = None # default is 'notification'
-    # POSTMAN_MAILER_APP = None # default is 'mailer'
+    # POSTMAN_DISALLOW_ANONYMOUS = True  # default is False
+    # POSTMAN_DISALLOW_MULTIRECIPIENTS = True  # default is False
+    # POSTMAN_DISALLOW_COPIES_ON_REPLY = True  # default is False
+    # POSTMAN_DISABLE_USER_EMAILING = True  # default is False
+    # POSTMAN_AUTO_MODERATE_AS = True  # default is None
+    # POSTMAN_SHOW_USER_AS = 'get_full_name'  # default is None
+    # POSTMAN_NOTIFIER_APP = None  # default is 'notification'
+    # POSTMAN_MAILER_APP = None  # default is 'mailer'
     # POSTMAN_AUTOCOMPLETER_APP = {
-        # 'name': '', # default is 'ajax_select'
-        # 'field': '', # default is 'AutoCompleteField'
-        # 'arg_name': '', # default is 'channel'
-        # 'arg_default': 'postman_friends', # no default, mandatory to enable the feature
-    # } # default is {}
+        # 'name': '',  # default is 'ajax_select'
+        # 'field': '',  # default is 'AutoCompleteField'
+        # 'arg_name': '',  # default is 'channel'
+        # 'arg_default': 'postman_friends',  # no default, mandatory to enable the feature
+    # }  # default is {}
 
 :file:`urls.py`::
 
