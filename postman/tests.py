@@ -31,6 +31,7 @@ INSTALLED_APPS = (
 )
 
 """
+from __future__ import unicode_literals
 import copy
 from datetime import datetime, timedelta
 import re
@@ -38,7 +39,11 @@ import sys
 
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth.models import User, AnonymousUser
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from postman.future_1_5 import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, clear_url_caches, get_resolver, get_urlconf
@@ -71,7 +76,7 @@ class GenericTest(TestCase):
     Usual generic tests.
     """
     def test_version(self):
-        self.assertEqual(sys.modules['postman'].__version__, "2.1.0a1")
+        self.assertEqual(sys.modules['postman'].__version__, "2.1.0")
 
 
 class BaseTest(TestCase):
@@ -99,9 +104,9 @@ class BaseTest(TestCase):
         }
         self.reload_modules()
 
-        self.user1 = User.objects.create_user('foo', 'foo@domain.com', 'pass')
-        self.user2 = User.objects.create_user('bar', 'bar@domain.com', 'pass')
-        self.user3 = User.objects.create_user('baz', 'baz@domain.com', 'pass')
+        self.user1 = get_user_model().objects.create_user('foo', 'foo@domain.com', 'pass')
+        self.user2 = get_user_model().objects.create_user('bar', 'bar@domain.com', 'pass')
+        self.user3 = get_user_model().objects.create_user('baz', 'baz@domain.com', 'pass')
         self.email = 'qux@domain.com'
 
     def check_now(self, dt):
@@ -297,7 +302,8 @@ class ViewTest(BaseTest):
         response = self.client.get(url + '?subject=that%20is%20the%20subject')
         self.assertContains(response, 'value="that is the subject"')
         response = self.client.get(url + '?body=this%20is%20my%20body')
-        self.assertContains(response, 'name="body">this is my body')
+        # before Dj 1.5: 'name="body">this is my body' ; after: 'name="body">\r\nthis is my body'
+        self.assertContains(response, 'this is my body</textarea>')
 
     def test_write_querystring(self):
         "Test the prefilling by query string."
@@ -309,7 +315,7 @@ class ViewTest(BaseTest):
         self.assertEqual(m.body, body)
         self.assertEqual(m.email, 'a@b.com' if is_anonymous else '')
         self.assertEqual(m.sender, self.user1 if not is_anonymous else None)
-        self.assertEqual(m.recipient.username, recipient_username)
+        self.assertEqual(m.recipient.get_username(), recipient_username)
         if is_anonymous:
             self.check_status(m, sender_deleted_at=True)
         self.assertEqual(len(mail.outbox), 0)
@@ -318,7 +324,7 @@ class ViewTest(BaseTest):
         "Check message generation, redirection, and mandatory fields."
         url = reverse('postman_write')
         url_with_success_url = reverse('postman_write_with_success_url_to_sent')
-        data = {'recipients': self.user2.username, 'subject': 's', 'body': 'b'}
+        data = {'recipients': self.user2.get_username(), 'subject': 's', 'body': 'b'}
         data.update(extra)
         # default redirect is to the requestor page
         response = self.client.post(url, data, HTTP_REFERER=url)
@@ -358,7 +364,7 @@ class ViewTest(BaseTest):
         url = reverse('postman_write')
         data = {
             'email': 'a@b.com', 'subject': 's', 'body': 'b',
-            'recipients': '{0}, {1}'.format(self.user2.username, self.user3.username)}
+            'recipients': '{0}, {1}'.format(self.user2.get_username(), self.user3.get_username())}
         # anonymous
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertFormError(response, 'form', 'recipients', CommaSeparatedUserField.default_error_messages['max'].format(limit_value=1, show_value=2))
@@ -384,7 +390,7 @@ class ViewTest(BaseTest):
         url = reverse('postman_write')
         data = {
             'subject': 's', 'body': 'b',
-            'recipients': '{0}, {1}'.format(self.user2.username, self.user3.username)}
+            'recipients': '{0}, {1}'.format(self.user2.get_username(), self.user3.get_username())}
         self.assert_(self.client.login(username='foo', password='pass'))
 
         response = self.client.post(reverse('postman_write_with_user_filter_reason'), data, HTTP_REFERER=url)
@@ -414,7 +420,7 @@ class ViewTest(BaseTest):
     def test_write_post_moderate(self):
         "Test 'auto_moderators' parameter."
         url = reverse('postman_write')
-        data = {'subject': 's', 'body': 'b', 'recipients': self.user2.username}
+        data = {'subject': 's', 'body': 'b', 'recipients': self.user2.get_username()}
         self.assert_(self.client.login(username='foo', password='pass'))
         response = self.client.post(reverse('postman_write_moderate'), data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
@@ -436,7 +442,7 @@ class ViewTest(BaseTest):
         from postman.forms import FullReplyForm
         self.assert_(isinstance(response.context['form'], FullReplyForm))
         self.assertContains(response, 'value="Re: s"')
-        self.assertContains(response, 'name="body">\n\nbar wrote:\n&gt; this is my body')
+        self.assertContains(response, '\n\nbar wrote:\n&gt; this is my body\n</textarea>')
         self.assertEqual(response.context['recipient'], 'bar')
 
     def test_reply_formatters(self):
@@ -448,7 +454,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         self.assertContains(response, 'value="Re_ s"')
-        self.assertContains(response, 'name="body">bar _ this is my body')
+        self.assertContains(response, 'bar _ this is my body</textarea>')
 
     def test_reply_auto_complete(self):
         "Test the 'autocomplete_channel' parameter."
@@ -520,7 +526,7 @@ class ViewTest(BaseTest):
         "Test number of recipients constraint."
         pk = self.c21().pk
         url = reverse('postman_reply', args=[pk])
-        data = {'subject': 's', 'body': 'b', 'recipients': self.user3.username}
+        data = {'subject': 's', 'body': 'b', 'recipients': self.user3.get_username()}
         self.assert_(self.client.login(username='foo', password='pass'))
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
@@ -528,7 +534,7 @@ class ViewTest(BaseTest):
         self.check_message(Message.objects.get(pk=pk+2), recipient_username='baz')
 
         url_with_max = reverse('postman_reply_with_max', args=[pk])
-        data.update(recipients='{0}, {1}'.format(self.user2.username, self.user3.username))
+        data.update(recipients='{0}, {1}'.format(self.user2.get_username(), self.user3.get_username()))
         response = self.client.post(url_with_max, data, HTTP_REFERER=url)
         self.assertFormError(response, 'form', 'recipients', CommaSeparatedUserField.default_error_messages['max'].format(limit_value=1, show_value=2))
 
@@ -543,7 +549,7 @@ class ViewTest(BaseTest):
         "Test user- and exchange- filters."
         pk = self.c21().pk
         url = reverse('postman_reply', args=[pk])
-        data = {'subject': 's', 'body': 'b', 'recipients': '{0}, {1}'.format(self.user2.username, self.user3.username)}
+        data = {'subject': 's', 'body': 'b', 'recipients': '{0}, {1}'.format(self.user2.get_username(), self.user3.get_username())}
         self.assert_(self.client.login(username='foo', password='pass'))
 
         response = self.client.post(reverse('postman_reply_with_user_filter_reason', args=[pk]), data, HTTP_REFERER=url)
@@ -619,7 +625,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         self.assertNotContains(response, 'value="Re_ s"')
-        self.assertContains(response, 'name="body">bar _ this is my body')
+        self.assertContains(response, 'bar _ this is my body</textarea>')
 
     def check_view_404(self, pk):
         self.check_404('postman_view', pk)
@@ -1052,18 +1058,18 @@ class MessageTest(BaseTest):
             m.clean()
         else:
             self.assertRaises(ValidationError, m.clean)
-        self.assertEqual(m.admin_sender(), s.username if s else '<'+email+'>')
+        self.assertEqual(m.admin_sender(), s.get_username() if s else '<'+email+'>')
         self.assertEqual(m.clear_sender, m.admin_sender())
         if s:
-            self.assertEqual(m.obfuscated_sender, s.username)
+            self.assertEqual(m.obfuscated_sender, s.get_username())
         elif email:
             self.assert_(obfuscated_email_re.match(m.obfuscated_sender))
         else:
             self.assertEqual(m.obfuscated_sender, '')
-        self.assertEqual(m.admin_recipient(), r.username if r else '<'+email+'>')
+        self.assertEqual(m.admin_recipient(), r.get_username() if r else '<'+email+'>')
         self.assertEqual(m.clear_recipient, m.admin_recipient())
         if r:
-            self.assertEqual(m.obfuscated_recipient, r.username)
+            self.assertEqual(m.obfuscated_recipient, r.get_username())
         elif email:
             self.assert_(obfuscated_email_re.match(m.obfuscated_recipient))
         else:
@@ -1525,10 +1531,10 @@ class FiltersTest(BaseTest):
         self.check_compact_date(dt, default, format='one')
         self.check_compact_date(dt, default, format='one,two')
         self.check_compact_date(dt, dt.strftime('%H:%M'))
-        dt = now() - timedelta(days=1)  # little fail: do not work on Jan, 1st, because the year changes as well
-        self.check_compact_date(dt, dt.strftime('%d %b').lower())  # filter's 'b' is lowercase
-        dt = now() - timedelta(days=365)
-        self.check_compact_date(dt, dt.strftime('%d/%m/%y'))
+        dt2 = dt - timedelta(days=1)  # little fail: do not work on Jan, 1st, because the year changes as well
+        self.check_compact_date(dt2, dt2.strftime('%d %b').lower())  # filter's 'b' is lowercase
+        dt2 = dt - timedelta(days=365)
+        self.check_compact_date(dt2, dt2.strftime('%d/%m/%y'))
 
 
 class TagsTest(BaseTest):
@@ -1630,7 +1636,7 @@ class ApiTest(BaseTest):
         self.assertEqual(m.body, body)
         self.assertEqual(m.email, '')
         self.assertEqual(m.sender, self.user1)
-        self.assertEqual(m.recipient.username, recipient_username)
+        self.assertEqual(m.recipient.get_username(), recipient_username)
 
     def test_pm_broadcast(self):
         "Test the case of a single recipient."

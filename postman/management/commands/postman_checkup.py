@@ -1,9 +1,11 @@
+from __future__ import unicode_literals
 import datetime
 
 from django.core.management.base import NoArgsCommand
 from django.db.models import Q, F, Count
 
 from postman.models import Message
+
 
 class Command(NoArgsCommand):
     help = "Can be run as a cron job or directly to check-up data consistency in the database."

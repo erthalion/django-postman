@@ -12,15 +12,21 @@ Examples of customization:
     exchange_filter = staticmethod(my_exchange_filter)
 
 """
+from __future__ import unicode_literals
+
 from django import forms
 from django.conf import settings
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from postman.future_1_5 import get_user_model
 from django.db import transaction
 from django.utils.translation import ugettext, ugettext_lazy as _
 
 from postman.fields import CommaSeparatedUserField
 from postman.models import Message
 from postman.utils import WRAP_WIDTH
+
 
 class BaseWriteForm(forms.ModelForm):
     """The base class for other forms."""
@@ -62,8 +68,8 @@ class BaseWriteForm(forms.ModelForm):
 
     error_messages = {
         'filtered': _("Writing to some users is not possible: {users}."),
-        'filtered_user': _("{user.username}"),
-        'filtered_user_with_reason': _("{user.username} ({reason})"),
+        'filtered_user': _("{username}"),
+        'filtered_user_with_reason': _("{username} ({reason})"),
     }
     def clean_recipients(self):
         """Check no filter prohibit the exchange."""
@@ -81,9 +87,9 @@ class BaseWriteForm(forms.ModelForm):
                         filtered_names.append(
                             self.error_messages[
                                 'filtered_user_with_reason' if reason else 'filtered_user'
-                            ].format(user=u, reason=reason)
+                            ].format(username=u.get_username(), reason=reason)
                         )
-                except forms.ValidationError, e:
+                except forms.ValidationError as e:
                     recipients.remove(u)
                     errors.extend(e.messages)
             if filtered_names:
@@ -106,7 +112,7 @@ class BaseWriteForm(forms.ModelForm):
 
         """
         recipients = self.cleaned_data.get('recipients', [])
-        if parent and not parent.thread_id: # at the very first reply, make it a conversation
+        if parent and not parent.thread_id:  # at the very first reply, make it a conversation
             parent.thread = parent
             parent.save()
             # but delay the setting of parent.replied_at to the moderation step
@@ -117,17 +123,17 @@ class BaseWriteForm(forms.ModelForm):
         initial_dates = self.instance.get_dates()
         initial_status = self.instance.moderation_status
         if recipient:
-            if isinstance(recipient, User) and recipient in recipients:
+            if isinstance(recipient, get_user_model()) and recipient in recipients:
                 recipients.remove(recipient)
             recipients.insert(0, recipient)
         is_successful = True
         for r in recipients:
-            if isinstance(r, User):
+            if isinstance(r, get_user_model()):
                 self.instance.recipient = r
             else:
                 self.instance.recipient = None
                 self.instance.email = r
-            self.instance.pk = None # force_insert=True is not accessible from here
+            self.instance.pk = None  # force_insert=True is not accessible from here
             self.instance.auto_moderate(auto_moderators)
             self.instance.clean_moderation(initial_status)
             self.instance.clean_for_visitor()
@@ -137,11 +143,12 @@ class BaseWriteForm(forms.ModelForm):
             self.instance.update_parent(initial_status)
             self.instance.notify_users(initial_status)
             # some resets for next reuse
-            if not isinstance(r, User):
+            if not isinstance(r, get_user_model()):
                 self.instance.email = ''
             self.instance.set_moderation(*initial_moderation)
             self.instance.set_dates(*initial_dates)
         return is_successful
+
 
 class WriteForm(BaseWriteForm):
     """The form for an authenticated user, to compose a message."""
@@ -150,6 +157,7 @@ class WriteForm(BaseWriteForm):
     class Meta(BaseWriteForm.Meta):
         fields = ('recipients', 'subject', 'body')
 
+
 class AnonymousWriteForm(BaseWriteForm):
     """The form for an anonymous user, to compose a message."""
     # The 'max' customization should not be permitted here.
@@ -157,10 +165,11 @@ class AnonymousWriteForm(BaseWriteForm):
     can_overwrite_limits = False
 
     email = forms.EmailField(label=_("Email"))
-    recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), max=1) # one recipient is enough
+    recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), max=1)  # one recipient is enough
 
     class Meta(BaseWriteForm.Meta):
         fields = ('email', 'recipients', 'subject', 'body')
+
 
 class BaseReplyForm(BaseWriteForm):
     """The base class for a reply to a message."""
@@ -178,6 +187,7 @@ class BaseReplyForm(BaseWriteForm):
     def save(self, *args, **kwargs):
         return super(BaseReplyForm, self).save(self.recipient, *args, **kwargs)
 
+
 class QuickReplyForm(BaseReplyForm):
     """
     The form to use in the view of a message or a conversation, for a quick reply.
@@ -186,6 +196,7 @@ class QuickReplyForm(BaseReplyForm):
 
     """
     pass
+
 
 allow_copies = not getattr(settings, 'POSTMAN_DISALLOW_COPIES_ON_REPLY', False)
 class FullReplyForm(BaseReplyForm):

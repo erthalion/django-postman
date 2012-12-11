@@ -1,14 +1,14 @@
 # Persian IR translation of django-postman.
 # Copyright (C) 2012 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
-# 
+#
 # Translators:
 # Alireza Savand <alireza.savand@gmail.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
-"POT-Creation-Date: 2010-12-27 14:21+0100\n"
+"POT-Creation-Date: 2012-12-10 23:09+0100\n"
 "PO-Revision-Date: 2012-05-20 13:00+0000\n"
 "Last-Translator: Alireza Savand <alireza.savand@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,284 +18,288 @@ msgstr ""
 "Language: fa_IR\n"
 "Plural-Forms: nplurals=1; plural=0\n"
 
-#: .\admin.py:22
+#: .\admin.py:25
 msgid "Sender and Recipient cannot be both undefined."
 msgstr "گیرنده و ارسال کننده نمی‌توانند هر دو معرفی نشده باشند."
 
-#: .\admin.py:29
+#: .\admin.py:32
 msgid "Visitor's email is in excess."
 msgstr "ایمیل بازدیدکننده اضافی است."
 
-#: .\admin.py:34
+#: .\admin.py:37
 msgid "Visitor's email is missing."
 msgstr "ایمیل بازدیدکننده گم شده."
 
-#: .\admin.py:40
+#: .\admin.py:43
 msgid "Reading date must be later to sending date."
 msgstr "تاریخ خواندن پیام باید بعد از تاریخ ارسال آن باشد."
 
-#: .\admin.py:45
+#: .\admin.py:48
 msgid "Deletion date by sender must be later to sending date."
 msgstr ""
 
-#: .\admin.py:50
+#: .\admin.py:53
 msgid "Deletion date by recipient must be later to sending date."
 msgstr ""
 
-#: .\admin.py:58
+#: .\admin.py:61
 msgid "Response date must be later to sending date."
 msgstr ""
 
-#: .\admin.py:60
+#: .\admin.py:63
 msgid "The message cannot be replied without having been read."
 msgstr "پیام نمی تواند ارسال شود بدون اینکه خوانده شود."
 
-#: .\admin.py:62
+#: .\admin.py:65
 msgid "Response date must be later to reading date."
 msgstr ""
 
-#: .\admin.py:64
+#: .\admin.py:67
 msgid "Response date cannot be set without at least one reply."
 msgstr ""
 
-#: .\admin.py:66
+#: .\admin.py:69
 msgid "The message cannot be replied without being in a conversation."
 msgstr ""
 
-#: .\admin.py:88 .\admin.py:157 .\templates\postman\view.html.py:5
+#: .\admin.py:92 .\admin.py:170 .\templates\postman\view.html.py:6
 msgid "Message"
 msgstr "پیام"
 
-#: .\admin.py:93
+#: .\admin.py:97
 msgid "Dates"
 msgstr "تاریخ‌ها"
 
-#: .\admin.py:98 .\admin.py:161
+#: .\admin.py:102 .\admin.py:174
 msgid "Moderation"
 msgstr "مدیریت"
 
-#: .\fields.py:22
+#: .\fields.py:27
 msgid "Some usernames are unknown or no more active: {users}."
 msgstr "بعضی از نام‌کاربری‌ها ناشناس هستند یا دیگر فعال نیستند : {users}."
 
-#: .\fields.py:23
+#: .\fields.py:28
 msgid ""
 "Ensure this value has at most {limit_value} distinct items (it has "
 "{show_value})."
 msgstr ""
 
-#: .\fields.py:24
+#: .\fields.py:29
 msgid ""
 "Ensure this value has at least {limit_value} distinct items (it has "
 "{show_value})."
 msgstr ""
 
-#: .\fields.py:25
+#: .\fields.py:30
 msgid "Some usernames are rejected: {users}."
 msgstr ""
 
-#: .\fields.py:26 .\forms.py:65
-msgid "{user.username}"
-msgstr "{user.username}"
+#: .\fields.py:31 .\forms.py:71
+msgid "{username}"
+msgstr "{username}"
 
-#: .\fields.py:27 .\forms.py:66
-msgid "{user.username} ({reason})"
-msgstr "{user.username} ({reason})"
+#: .\fields.py:32 .\forms.py:72
+msgid "{username} ({reason})"
+msgstr "{username} ({reason})"
 
-#: .\forms.py:64
+#: .\forms.py:70
 msgid "Writing to some users is not possible: {users}."
 msgstr "نوشتن برای برخی کاربران امکان پذیر نیست : {users}."
 
-#: .\forms.py:148 .\forms.py:160
+#: .\forms.py:155 .\forms.py:168
 msgid "Recipients"
 msgstr "گیرندگان"
 
-#: .\forms.py:148 .\forms.py:160 .\templates\postman\base_folder.html.py:26
+#: .\forms.py:155 .\forms.py:168 .\templates\postman\base_folder.html.py:34
 #: .\templates\postman\reply.html.py:4
 msgid "Recipient"
 msgstr "گیرنده"
 
-#: .\forms.py:159
+#: .\forms.py:167
 msgid "Email"
 msgstr "ایمیل"
 
-#: .\forms.py:175
+#: .\forms.py:184
 msgid "Undefined recipient."
 msgstr "گیرنده معرفی نشده."
 
-#: .\forms.py:194
+#: .\forms.py:205
 msgid "Additional recipients"
 msgstr "گیرندگان مضاعف"
 
-#: .\forms.py:194
+#: .\forms.py:205
 msgid "Additional recipient"
 msgstr "گیرنده مضاعف"
 
-#: .\models.py:19
+#: .\models.py:27
 msgid "Pending"
 msgstr "در نوبت"
 
-#: .\models.py:20
+#: .\models.py:28
 msgid "Accepted"
 msgstr "قبول شده"
 
-#: .\models.py:21 .\templates\postman\view.html.py:13
+#: .\models.py:29 .\templates\postman\view.html.py:14
 msgid "Rejected"
 msgstr "در شده"
 
-#: .\models.py:197
+#: .\models.py:242
 msgid "subject"
 msgstr "موضوع"
 
-#: .\models.py:198
+#: .\models.py:243
 msgid "body"
 msgstr "محتوا"
 
-#: .\models.py:199 .\models.py:281
+#: .\models.py:244 .\models.py:326
 msgid "sender"
 msgstr "ارسال کننده"
 
-#: .\models.py:200 .\models.py:305
+#: .\models.py:245 .\models.py:350
 msgid "recipient"
 msgstr "گیرنده"
 
-#: .\models.py:201
+#: .\models.py:246
 msgid "visitor"
 msgstr "بازدیدکننده"
 
-#: .\models.py:202
+#: .\models.py:247
 msgid "parent message"
 msgstr "پیام بالاسری"
 
-#: .\models.py:203
+#: .\models.py:248
 msgid "root message"
 msgstr "پیام اصلی"
 
-#: .\models.py:204
+#: .\models.py:249
 msgid "sent at"
 msgstr "ارسال شده در"
 
-#: .\models.py:205
+#: .\models.py:250
 msgid "read at"
 msgstr "خوانده شده در"
 
-#: .\models.py:206
+#: .\models.py:251
 msgid "replied at"
 msgstr "جواب داده شده در"
 
-#: .\models.py:207
+#: .\models.py:252
 msgid "archived by sender"
 msgstr "آرشیو شده توسط ارسال کننده"
 
-#: .\models.py:208
+#: .\models.py:253
 msgid "archived by recipient"
 msgstr "آرشیو شده توسط گیرنده"
 
-#: .\models.py:209
+#: .\models.py:254
 msgid "deleted by sender at"
 msgstr "حذف شده توسط ارسال کننده در"
 
-#: .\models.py:210
+#: .\models.py:255
 msgid "deleted by recipient at"
 msgstr "حذف شده توسط گیرنده در"
 
-#: .\models.py:212
+#: .\models.py:257
 msgid "status"
 msgstr "وضعیت"
 
-#: .\models.py:214
+#: .\models.py:259
 msgid "moderator"
 msgstr "مدیر"
 
-#: .\models.py:215
+#: .\models.py:260
 msgid "moderated at"
 msgstr "میدریت شده در"
 
-#: .\models.py:216
+#: .\models.py:261
 msgid "rejection reason"
 msgstr "دلیل رد شدن"
 
-#: .\models.py:221
+#: .\models.py:266
 msgid "message"
 msgstr "پیام"
 
-#: .\models.py:222
+#: .\models.py:267
 msgid "messages"
 msgstr "پیام‌ها"
 
-#: .\models.py:333
+#: .\models.py:378
 msgid "Undefined sender."
 msgstr "ارسال کننده معرفی نشده."
 
-#: .\models.py:473
+#: .\models.py:523
 msgid "pending message"
 msgstr "پیام در صف"
 
-#: .\models.py:474
+#: .\models.py:524
 msgid "pending messages"
 msgstr "پیام‌های در صف"
 
-#: .\utils.py:32
+#: .\utils.py:37
 msgid "> "
 msgstr " <"
 
-#: .\utils.py:48
+#: .\utils.py:53
 msgid ""
 "\n"
 "\n"
 "{sender} wrote:\n"
 "{body}\n"
-msgstr "\n\n{sender} نوشت :\n{body}\n"
+msgstr ""
+"\n"
+"\n"
+"{sender} نوشت :\n"
+"{body}\n"
 
-#: .\utils.py:57
+#: .\utils.py:63
 msgid "Re: {subject}"
 msgstr "در جواب: {subject}"
 
-#: .\views.py:129 .\views.py:187
+#: .\views.py:144 .\views.py:206
 msgid "Message successfully sent."
 msgstr "پیام با موفقیت ارسال شد."
 
-#: .\views.py:131 .\views.py:189
+#: .\views.py:146 .\views.py:208
 msgid "Message rejected for at least one recipient."
 msgstr "پیام رد شد حداقل برای یک گیرنده."
 
-#: .\views.py:276
+#: .\views.py:299
 msgid "Select at least one object."
 msgstr "حداقل یکی انتخاب کنید."
 
-#: .\views.py:282
+#: .\views.py:306
 msgid "Messages or conversations successfully archived."
 msgstr "پیام یا بحث با موفقیت بایگانی شد."
 
-#: .\views.py:287
+#: .\views.py:312
 msgid "Messages or conversations successfully deleted."
 msgstr "پیام یا بحث با موفقیت حذف شد."
 
-#: .\views.py:292
+#: .\views.py:318
 msgid "Messages or conversations successfully recovered."
 msgstr "پیام یا بحث با موفقیت بازگردانی شد."
 
-#: .\management\__init__.py:14
+#: .\management\__init__.py:15
 msgid "Message Rejected"
 msgstr "پیام رد شد"
 
-#: .\management\__init__.py:14
+#: .\management\__init__.py:15
 msgid "Your message has been rejected"
 msgstr "پیام شما رد شد"
 
-#: .\management\__init__.py:15
+#: .\management\__init__.py:16
 msgid "Message Received"
 msgstr "پیام دریافت شد"
 
-#: .\management\__init__.py:15
+#: .\management\__init__.py:16
 msgid "You have received a message"
 msgstr "شما یک پیام دریافت کردید"
 
-#: .\management\__init__.py:16
+#: .\management\__init__.py:17
 msgid "Reply Received"
 msgstr "پاسخ دریافت شد"
 
-#: .\management\__init__.py:16
+#: .\management\__init__.py:17
 msgid "You have received a reply"
 msgstr "شما یک پاسخ دریافت کردید"
 
@@ -322,81 +326,81 @@ msgid ""
 "long term storage."
 msgstr ""
 
-#: .\templates\postman\base.html.py:3
+#: .\templates\postman\base.html.py:4
 msgid "Messaging"
 msgstr "پیام نوشتن"
 
-#: .\templates\postman\base.html.py:6
+#: .\templates\postman\base.html.py:13
 msgid "Inbox"
 msgstr "صندوق"
 
-#: .\templates\postman\base.html.py:7 .\templates\postman\sent.html.py:3
+#: .\templates\postman\base.html.py:14 .\templates\postman\sent.html.py:3
 msgid "Sent Messages"
 msgstr "پیام‌های ارسال شده"
 
-#: .\templates\postman\base.html.py:8 .\templates\postman\write.html.py:3
+#: .\templates\postman\base.html.py:15 .\templates\postman\write.html.py:3
 msgid "Write"
 msgstr "نوشتن"
 
-#: .\templates\postman\base.html.py:9
+#: .\templates\postman\base.html.py:16
 msgid "Archives"
 msgstr "آرشیو‌ها"
 
-#: .\templates\postman\base.html.py:10
+#: .\templates\postman\base.html.py:17
 msgid "Trash"
 msgstr "سطل زباله"
 
-#: .\templates\postman\base_folder.html.py:9
+#: .\templates\postman\base_folder.html.py:16
 msgid "Sorry, this page number is invalid."
 msgstr "شرمنده، شماره این صفحه اشتباه است."
 
-#: .\templates\postman\base_folder.html.py:12
+#: .\templates\postman\base_folder.html.py:20
 msgid "by conversation"
 msgstr "توسط بحث"
 
-#: .\templates\postman\base_folder.html.py:13
+#: .\templates\postman\base_folder.html.py:21
 msgid "by message"
 msgstr "توسط پیام"
 
-#: .\templates\postman\base_folder.html.py:17
-#: .\templates\postman\view.html.py:22
+#: .\templates\postman\base_folder.html.py:25
+#: .\templates\postman\view.html.py:23
 msgid "Delete"
 msgstr "حذف"
 
-#: .\templates\postman\base_folder.html.py:18
-#: .\templates\postman\view.html.py:23
+#: .\templates\postman\base_folder.html.py:26
+#: .\templates\postman\view.html.py:24
 msgid "Archive"
 msgstr "آرشیو"
 
-#: .\templates\postman\base_folder.html.py:19
+#: .\templates\postman\base_folder.html.py:27
 msgid "Undelete"
 msgstr "برگرداندن"
 
-#: .\templates\postman\base_folder.html.py:24
+#: .\templates\postman\base_folder.html.py:32
 msgid "Action"
 msgstr "حرکت"
 
-#: .\templates\postman\base_folder.html.py:25
+#: .\templates\postman\base_folder.html.py:33
 msgid "Sender"
 msgstr "ارسال کننده"
 
-#: .\templates\postman\base_folder.html.py:27
+#: .\templates\postman\base_folder.html.py:35
 msgid "Subject"
 msgstr "موضوع"
 
-#: .\templates\postman\base_folder.html.py:28
+#: .\templates\postman\base_folder.html.py:36
 msgid "Date"
 msgstr "تاریخ"
 
-#: .\templates\postman\base_folder.html.py:43
+#: .\templates\postman\base_folder.html.py:51
 msgid "g:i A,M j,n/j/y"
 msgstr "g:i A,M j,n/j/y"
 
-#: .\templates\postman\base_folder.html.py:51
+#: .\templates\postman\base_folder.html.py:58
 msgid "No messages."
 msgstr "بودن پیام."
 
-#: .\templates\postman\base_write.html.py:20
+#: .\templates\postman\base_write.html.py:33
 msgid "Send"
 msgstr "ارسال"
 
@@ -477,7 +481,8 @@ msgstr "لظفا جواب خود را در زیر از مخاطب خود پید�
 
 #: .\templates\postman\email_visitor.txt.py:15
 msgid "For more comfort, we encourage you to open an account on the site."
-msgstr "برای راحتی بیشتر پیشنهاد میدهیم، یک حساب کاربری روی این سایت ایجاد کنید."
+msgstr ""
+"برای راحتی بیشتر پیشنهاد میدهیم، یک حساب کاربری روی این سایت ایجاد کنید."
 
 #: .\templates\postman\inbox.html.py:3
 msgid "Received Messages"
@@ -487,8 +492,8 @@ msgstr "پیام‌های دریافت شده"
 msgid "Received"
 msgstr "دریافت شده"
 
-#: .\templates\postman\reply.html.py:3 .\templates\postman\view.html.py:25
-#: .\templates\postman\view.html.py:28 .\templates\postman\view.html.py:31
+#: .\templates\postman\reply.html.py:3 .\templates\postman\view.html.py:26
+#: .\templates\postman\view.html.py:29 .\templates\postman\view.html.py:32
 msgid "Reply"
 msgstr "پاسخ"
 
@@ -506,18 +511,18 @@ msgid ""
 "storage, use instead the archive folder."
 msgstr ""
 
-#: .\templates\postman\view.html.py:5
+#: .\templates\postman\view.html.py:6
 msgid "Conversation"
 msgstr "بحث"
 
-#: .\templates\postman\view.html.py:13
+#: .\templates\postman\view.html.py:14
 msgid ":"
 msgstr ":"
 
-#: .\templates\postman\view.html.py:20
+#: .\templates\postman\view.html.py:21
 msgid "Back"
 msgstr "برگرد"
 
-#: .\templatetags\postman_tags.py:35
+#: .\templatetags\postman_tags.py:48
 msgid "<me>"
 msgstr "<من>"

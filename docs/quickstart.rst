@@ -99,7 +99,7 @@ You may specify some additional configuration options in your :file:`settings.py
 
     * The name of a property of User. For example: 'last_name'
     * The name of a method of User. For example: 'get_full_name'
-    * A function, receiving the User instance as the only parameter. For example: lambda u: u.get_profile().nickname
+    * A function, receiving the User instance as the only parameter. For example: ``lambda u: u.get_profile().nickname``
     * ``None`` : the default text representation of the User (username) is used.
 
     *Defaults to*: None.

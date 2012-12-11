@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import re
 import sys
 from textwrap import TextWrapper
@@ -32,6 +33,7 @@ DISABLE_USER_EMAILING = getattr(settings, 'POSTMAN_DISABLE_USER_EMAILING', False
 # default wrap width; referenced in forms.py
 WRAP_WIDTH = 55
 
+
 def format_body(sender, body, indent=_("> "), width=WRAP_WIDTH):
     """
     Wrap the text and prepend lines with a prefix.
@@ -44,11 +46,12 @@ def format_body(sender, body, indent=_("> "), width=WRAP_WIDTH):
     Used for quoting messages in replies.
 
     """
-    indent = force_unicode(indent) # join() doesn't work on lists with lazy translation objects
+    indent = force_unicode(indent)  # join() doesn't work on lists with lazy translation objects
     wrapper = TextWrapper(width=width, initial_indent=indent, subsequent_indent=indent)
     # rem: TextWrapper doesn't add the indent on an empty text
     quote = '\n'.join([line.startswith(indent) and indent+line or wrapper.fill(line) or indent for line in body.splitlines()])
     return ugettext("\n\n{sender} wrote:\n{body}\n").format(sender=sender, body=quote)
+
 
 def format_subject(subject):
     """
@@ -61,6 +64,7 @@ def format_subject(subject):
     pattern = '^' + str.replace('{subject}', '.*') + '$'
     return subject if re.match(pattern, subject, re.IGNORECASE) else str.format(subject=subject)
 
+
 def email(subject_template, message_template, recipient_list, object, action=None):
     """Compose and send an email."""
     site = Site.objects.get_current()
@@ -72,9 +76,11 @@ def email(subject_template, message_template, recipient_list, object, action=Non
     # during the development phase, consider using the setting: EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
 
+
 def email_visitor(object, action):
     """Email a visitor."""
     email('postman/email_visitor_subject.txt', 'postman/email_visitor.txt', [object.email], object, action)
+
 
 def notify_user(object, action):
     """Notify a user."""

@@ -2,38 +2,49 @@
 URLconf for tests.py usage.
 
 """
+from __future__ import unicode_literals
+
 from django.conf import settings
 try:
-    from django.conf.urls import patterns, include, url # django 1.4
+    from django.conf.urls import patterns, include, url  # django 1.4
 except ImportError:
-    from django.conf.urls.defaults import * # "patterns, include, url" is enough for django 1.3, "*" for django 1.2
+    from django.conf.urls.defaults import *  # "patterns, include, url" is enough for django 1.3, "*" for django 1.2
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from postman.future_1_5 import get_user_model
 from django.forms import ValidationError
-from django.views.generic.simple import redirect_to
+from django.views.generic.base import RedirectView
 
 from postman.urls import OPTIONS
 
+
 # user_filter function set
 def user_filter_reason(user):
-    if user.username == 'bar': return 'some reason'
+    if user.get_username() == 'bar':
+        return 'some reason'
     return None
 def user_filter_no_reason(user):
     return ''
 def user_filter_false(user):
     return False
 def user_filter_exception(user):
-    if user.username == 'bar': raise ValidationError(['first good reason',"anyway, I don't like {0}".format(user.username)])
+    if user.get_username() == 'bar':
+        raise ValidationError(['first good reason', "anyway, I don't like {0}".format(user.get_username())])
     return None
 
 # exchange_filter function set
 def exch_filter_reason(sender, recipient, recipients_list):
-    if recipient.username=='bar': return 'some reason'
+    if recipient.get_username() == 'bar':
+        return 'some reason'
     return None
 def exch_filter_no_reason(sender, recipient, recipients_list):
     return ''
 def exch_filter_false(sender, recipient, recipients_list):
     return False
 def exch_filter_exception(sender, recipient, recipients_list):
-    if recipient.username == 'bar': raise ValidationError(['first good reason',"anyway, I don't like {0}".format(recipient.username)])
+    if recipient.get_username() == 'bar':
+        raise ValidationError(['first good reason', "anyway, I don't like {0}".format(recipient.get_username())])
     return None
 
 # auto-moderation function set
@@ -62,7 +73,7 @@ postman_patterns = patterns('postman.views',
     url(r'^archive/$', 'archive', name='postman_archive'),
     url(r'^delete/$', 'delete', name='postman_delete'),
     url(r'^undelete/$', 'undelete', name='postman_undelete'),
-    (r'^$', redirect_to, {'url': 'inbox/'}),
+    (r'^$', RedirectView.as_view(url='inbox/')),
 
     # Customized set
     # 'success_url'
@@ -115,18 +126,18 @@ postman_patterns = patterns('postman.views',
 )
 
 urlpatterns = patterns('',
-    (r'^accounts/login/$', 'django.contrib.auth.views.login'), # because of the login_required decorator
+    (r'^accounts/login/$', 'django.contrib.auth.views.login'),  # because of the login_required decorator
     (r'^messages/', include(postman_patterns)),
 )
 
 # because of fields.py/AutoCompleteWidget/render()/reverse()
 if 'ajax_select' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
-        (r'^ajax_select/', include('ajax_select.urls')), # django-ajax-selects
+        (r'^ajax_select/', include('ajax_select.urls')),  # django-ajax-selects
     )
 
 # optional
 if 'notification' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
-        (r'^notification/', include('notification.urls')), # django-notification
+        (r'^notification/', include('notification.urls')),  # django-notification
     )

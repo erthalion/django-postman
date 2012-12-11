@@ -1,7 +1,11 @@
+from __future__ import unicode_literals
 import hashlib
 
 from django.conf import settings
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from postman.future_1_5 import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import truncate_words
@@ -27,8 +31,8 @@ STATUS_CHOICES = (
 # ordering constants
 ORDER_BY_KEY = 'o'  # as 'order'
 ORDER_BY_FIELDS = {
-    'f': 'sender__username',     # as 'from'
-    't': 'recipient__username',  # as 'to'
+    'f': 'sender__' + get_user_model().USERNAME_FIELD,     # as 'from'
+    't': 'recipient__' + get_user_model().USERNAME_FIELD,  # as 'to'
     's': 'subject',  # as 'subject'
     'd': 'sent_at',  # as 'date'
 }
@@ -48,9 +52,9 @@ def get_order_by(query_dict):
     >>> get_order_by({})
 
     >>> get_order_by({ORDER_BY_KEY: 'f'})
-    'sender__username'
+    u'sender__username'
     >>> get_order_by({ORDER_BY_KEY: 'D'})
-    '-sent_at'
+    u'-sent_at'
     """
     if ORDER_BY_KEY in query_dict:
         code = query_dict[ORDER_BY_KEY]  # code may be uppercase or lowercase
@@ -237,8 +241,8 @@ class Message(models.Model):
 
     subject = models.CharField(_("subject"), max_length=SUBJECT_MAX_LENGTH)
     body = models.TextField(_("body"), blank=True)
-    sender = models.ForeignKey(User, related_name='sent_messages', null=True, blank=True, verbose_name=_("sender"))
-    recipient = models.ForeignKey(User, related_name='received_messages', null=True, blank=True, verbose_name=_("recipient"))
+    sender = models.ForeignKey(get_user_model(), related_name='sent_messages', null=True, blank=True, verbose_name=_("sender"))
+    recipient = models.ForeignKey(get_user_model(), related_name='received_messages', null=True, blank=True, verbose_name=_("recipient"))
     email = models.EmailField(_("visitor"), blank=True)  # instead of either sender or recipient, for an AnonymousUser
     parent = models.ForeignKey('self', related_name='next_messages', null=True, blank=True, verbose_name=_("parent message"))
     thread = models.ForeignKey('self', related_name='child_messages', null=True, blank=True, verbose_name=_("root message"))
@@ -251,7 +255,7 @@ class Message(models.Model):
     recipient_deleted_at = models.DateTimeField(_("deleted by recipient at"), null=True, blank=True)
     # moderation fields
     moderation_status = models.CharField(_("status"), max_length=1, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    moderation_by = models.ForeignKey(User, related_name='moderated_messages',
+    moderation_by = models.ForeignKey(get_user_model(), related_name='moderated_messages',
         null=True, blank=True, verbose_name=_("moderator"))
     moderation_date = models.DateTimeField(_("moderated at"), null=True, blank=True)
     moderation_reason = models.CharField(_("rejection reason"), max_length=120, blank=True)
@@ -264,7 +268,7 @@ class Message(models.Model):
         ordering = ['-sent_at', '-id']
 
     def __unicode__(self):
-        return u"{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, truncate_words(self.subject, 5))
+        return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, truncate_words(self.subject,5))
 
     @models.permalink
     def get_absolute_url(self):
@@ -305,7 +309,7 @@ class Message(models.Model):
         shrunken_digest = '..'.join((digest[:4], digest[-4:]))  # 32 characters is too long and is useless
         bits = email.split('@')
         if len(bits) != 2:
-            return u''
+            return ''
         domain = bits[1]
         return '@'.join((shrunken_digest, domain.rsplit('.', 1)[0]))  # leave off the TLD to gain some space
 

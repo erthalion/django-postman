@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from datetime import timedelta
 from optparse import make_option
 
@@ -10,6 +11,7 @@ except ImportError:
     now = datetime.now
 
 from postman.models import Message
+
 
 class Command(NoArgsCommand):
     help = """Can be run as a cron job or directly to clean out old data from the database:

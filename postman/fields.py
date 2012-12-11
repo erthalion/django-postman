@@ -1,13 +1,18 @@
 """
 Custom fields.
 """
+from __future__ import unicode_literals
 
 from django.conf import settings
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from postman.future_1_5 import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
 from django.forms.fields import CharField
 from django.utils.translation import ugettext_lazy as _
+
 
 class BasicCommaSeparatedUserField(CharField):
     """
@@ -23,8 +28,8 @@ class BasicCommaSeparatedUserField(CharField):
         'max': _("Ensure this value has at most {limit_value} distinct items (it has {show_value})."),
         'min': _("Ensure this value has at least {limit_value} distinct items (it has {show_value})."),
         'filtered': _("Some usernames are rejected: {users}."),
-        'filtered_user': _("{user.username}"),
-        'filtered_user_with_reason': _("{user.username} ({reason})"),
+        'filtered_user': _("{username}"),
+        'filtered_user_with_reason': _("{username} ({reason})"),
     }
 
     def __init__(self, max=None, min=None, user_filter=None, *args, **kwargs):
@@ -45,7 +50,7 @@ class BasicCommaSeparatedUserField(CharField):
     def to_python(self, value):
         """Normalize data to an unordered list of distinct, non empty, whitespace-stripped strings."""
         value = super(BasicCommaSeparatedUserField, self).to_python(value)
-        if value in EMPTY_VALUES: # Return an empty list if no useful input was given.
+        if value in EMPTY_VALUES:  # Return an empty list if no useful input was given.
             return []
         return list(set([name.strip() for name in value.split(',') if name and not name.isspace()]))
 
@@ -65,8 +70,9 @@ class BasicCommaSeparatedUserField(CharField):
         names = super(BasicCommaSeparatedUserField, self).clean(value)
         if not names:
             return []
-        users = list(User.objects.filter(is_active=True, username__in=names))
-        unknown_names = set(names) ^ set([u.username for u in users])
+        user_model = get_user_model()
+        users = list(user_model.objects.filter(is_active=True, **{'{0}__in'.format(user_model.USERNAME_FIELD): names}))
+        unknown_names = set(names) ^ set([u.get_username() for u in users])
         errors = []
         if unknown_names:
             errors.append(self.error_messages['unknown'].format(users=', '.join(unknown_names)))
@@ -80,9 +86,9 @@ class BasicCommaSeparatedUserField(CharField):
                         filtered_names.append(
                             self.error_messages[
                                 'filtered_user_with_reason' if reason else 'filtered_user'
-                            ].format(user=u, reason=reason)
+                            ].format(username=u.get_username(), reason=reason)
                         )
-                except ValidationError, e:
+                except ValidationError as e:
                     users.remove(u)
                     errors.extend(e.messages)
             if filtered_names:
@@ -95,7 +101,7 @@ d = getattr(settings, 'POSTMAN_AUTOCOMPLETER_APP', {})
 app_name = d.get('name', 'ajax_select')
 field_name = d.get('field', 'AutoCompleteField')
 arg_name = d.get('arg_name', 'channel')
-arg_default = d.get('arg_default') # the minimum to declare to enable the feature
+arg_default = d.get('arg_default')  # the minimum to declare to enable the feature
 
 autocompleter_app = {}
 if app_name in settings.INSTALLED_APPS and arg_default:

@@ -1,9 +1,12 @@
+from __future__ import unicode_literals
+
 from django import forms
 from django.contrib import admin
 from django.db import transaction
 from django.utils.translation import ugettext, ugettext_lazy as _
 
 from postman.models import Message, PendingMessage
+
 
 class MessageAdminForm(forms.ModelForm):
     class Meta:
@@ -74,6 +77,7 @@ class MessageAdminForm(forms.ModelForm):
         self.initial_status = obj.moderation_status
         return cleaned_data
 
+
 class MessageAdmin(admin.ModelAdmin):
     form = MessageAdminForm
     search_fields = ('subject', 'body')
@@ -101,8 +105,8 @@ class MessageAdmin(admin.ModelAdmin):
             )}),
     )
     readonly_fields = (
-        'parent', 'thread', # no reason to change, and anyway too many objects
-        'moderation_date', 'moderation_by', # automatically set at status change
+        'parent', 'thread',  # no reason to change, and anyway too many objects
+        'moderation_date', 'moderation_by',  # automatically set at status change
     )
     radio_fields = {'moderation_status': admin.VERTICAL}
 
@@ -132,6 +136,7 @@ class MessageAdmin(admin.ModelAdmin):
         obj.update_parent(form.initial_status)
         obj.notify_users(form.initial_status, is_auto_moderated=False)
 
+
 class PendingMessageAdminForm(forms.ModelForm):
     class Meta:
         model = PendingMessage
@@ -149,6 +154,7 @@ class PendingMessageAdminForm(forms.ModelForm):
         elif '_saveasrejected' in self.data:
             obj.set_rejected()
         return cleaned_data
+
 
 class PendingMessageAdmin(MessageAdmin):
     form = PendingMessageAdminForm

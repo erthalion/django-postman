@@ -16,8 +16,10 @@ for e in events:
         subject='New {0} at Our School: {1}'.format(e.type, e.title),
         body=e.description)
 """
+from __future__ import unicode_literals
+
 try:
-    from django.utils.timezone import now   # Django 1.4 aware datetimes
+    from django.utils.timezone import now  # Django 1.4 aware datetimes
 except ImportError:
     from datetime import datetime
     now = datetime.now

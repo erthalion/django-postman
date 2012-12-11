@@ -1,7 +1,11 @@
+from __future__ import unicode_literals
 import datetime
 
 from django import VERSION
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from postman.future_1_5 import get_user_model
 from django.http import QueryDict
 from django.template import Node
 from django.template import TemplateSyntaxError
@@ -14,10 +18,10 @@ from postman.models import ORDER_BY_KEY, ORDER_BY_MAPPER, Message,\
 
 register = Library()
 
+
 ##########
 # filters
 ##########
-
 @register.filter
 def sub(value, arg):
     """Subtract the arg from the value."""
@@ -36,10 +40,11 @@ def or_me(value, arg):
     Typical usage: message.obfuscated_sender|or_me:user
 
     """
+    user_model = get_user_model()
     if not isinstance(value, (unicode, str)):
-        value = (get_user_representation if isinstance(value, User) else unicode)(value)
+        value = (get_user_representation if isinstance(value, user_model) else unicode)(value)
     if not isinstance(arg, (unicode, str)):
-        arg = (get_user_representation if isinstance(arg, User) else unicode)(arg)
+        arg = (get_user_representation if isinstance(arg, user_model) else unicode)(arg)
     return _('<me>') if value == arg else value
 
 
@@ -52,16 +57,16 @@ def compact_date(value, arg):
     Typical usage: |compact_date:_("G:i,j b,j/n/y")
 
     """
-    bits = arg.split(u',')
+    bits = arg.split(',')
     if len(bits) < 3:
         return value  # Invalid arg.
     today = datetime.date.today()
     return date(value, bits[0] if value.date() == today else bits[1] if value.year == today.year else bits[2])
 
+
 #######
 # tags
 #######
-
 class OrderByNode(Node):
     "For use in the postman_order_by tag"
     def __init__(self, code):
@@ -84,7 +89,7 @@ class OrderByNode(Node):
         else:
             code = None
         if self.code:
-            gets[ORDER_BY_KEY] = self.code if self.code <> code else self.code.upper()
+            gets[ORDER_BY_KEY] = self.code if self.code != code else self.code.upper()
         return '?'+gets.urlencode() if gets else ''
 
 

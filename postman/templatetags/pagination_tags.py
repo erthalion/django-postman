@@ -9,21 +9,27 @@ as it may be the case for the test suite run in a minimal configuration.
 To deactivate this mock and use the real implementation, just make sure that 'pagination' is declared
 before 'postman' in the INSTALLED_APPS setting.
 """
+from __future__ import unicode_literals
+
 from django.template import Node, Library
 
 register = Library()
 
+
 class AutoPaginateNode(Node):
     def render(self, context):
-        return u''
+        return ''
+
 
 @register.tag
 def autopaginate(parser, token):
     return AutoPaginateNode()
 
+
 class PaginateNode(Node):
     def render(self, context):
-        return u''
+        return ''
+
 
 @register.tag
 def paginate(parser, token):

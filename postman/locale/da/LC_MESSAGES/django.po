@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-postman 1.0.x\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
-"POT-Creation-Date: 2011-02-07 08:48+0100\n"
+"POT-Creation-Date: 2012-12-10 22:52+0100\n"
 "PO-Revision-Date: 2011-02-07 08:48+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,228 +17,228 @@ msgstr ""
 "Language: da\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: .\admin.py:22
+#: .\admin.py:25
 msgid "Sender and Recipient cannot be both undefined."
 msgstr ""
 
-#: .\admin.py:29
+#: .\admin.py:32
 msgid "Visitor's email is in excess."
 msgstr ""
 
-#: .\admin.py:34
+#: .\admin.py:37
 msgid "Visitor's email is missing."
 msgstr ""
 
-#: .\admin.py:40
+#: .\admin.py:43
 msgid "Reading date must be later to sending date."
 msgstr ""
 
-#: .\admin.py:45
+#: .\admin.py:48
 msgid "Deletion date by sender must be later to sending date."
 msgstr ""
 
-#: .\admin.py:50
+#: .\admin.py:53
 msgid "Deletion date by recipient must be later to sending date."
 msgstr ""
 
-#: .\admin.py:58
+#: .\admin.py:61
 msgid "Response date must be later to sending date."
 msgstr ""
 
-#: .\admin.py:60
+#: .\admin.py:63
 msgid "The message cannot be replied without having been read."
 msgstr ""
 
-#: .\admin.py:62
+#: .\admin.py:65
 msgid "Response date must be later to reading date."
 msgstr ""
 
-#: .\admin.py:64
+#: .\admin.py:67
 msgid "Response date cannot be set without at least one reply."
 msgstr ""
 
-#: .\admin.py:66
+#: .\admin.py:69
 msgid "The message cannot be replied without being in a conversation."
 msgstr ""
 
-#: .\admin.py:88 .\admin.py:164 .\templates\postman\view.html.py:5
+#: .\admin.py:92 .\admin.py:170 .\templates\postman\view.html.py:6
 msgid "Message"
 msgstr "Beskeder"
 
-#: .\admin.py:93
+#: .\admin.py:97
 msgid "Dates"
 msgstr ""
 
-#: .\admin.py:98 .\admin.py:168
+#: .\admin.py:102 .\admin.py:174
 msgid "Moderation"
 msgstr ""
 
-#: .\fields.py:22
+#: .\fields.py:27
 msgid "Some usernames are unknown or no more active: {users}."
 msgstr ""
 
-#: .\fields.py:23
+#: .\fields.py:28
 msgid ""
 "Ensure this value has at most {limit_value} distinct items (it has "
 "{show_value})."
 msgstr ""
 
-#: .\fields.py:24
+#: .\fields.py:29
 msgid ""
 "Ensure this value has at least {limit_value} distinct items (it has "
 "{show_value})."
 msgstr ""
 
-#: .\fields.py:25
+#: .\fields.py:30
 msgid "Some usernames are rejected: {users}."
 msgstr ""
 
-#: .\fields.py:26 .\forms.py:65
-msgid "{user.username}"
-msgstr "{user.username}"
+#: .\fields.py:31 .\forms.py:71
+msgid "{username}"
+msgstr "{username}"
 
-#: .\fields.py:27 .\forms.py:66
-msgid "{user.username} ({reason})"
-msgstr "{user.username} ({reason})"
+#: .\fields.py:32 .\forms.py:72
+msgid "{username} ({reason})"
+msgstr "{username} ({reason})"
 
-#: .\forms.py:64
+#: .\forms.py:70
 msgid "Writing to some users is not possible: {users}."
 msgstr ""
 
-#: .\forms.py:148 .\forms.py:160
+#: .\forms.py:155 .\forms.py:168
 msgid "Recipients"
 msgstr ""
 
-#: .\forms.py:148 .\forms.py:160 .\templates\postman\base_folder.html.py:26
+#: .\forms.py:155 .\forms.py:168 .\templates\postman\base_folder.html.py:34
 #: .\templates\postman\reply.html.py:4
 msgid "Recipient"
 msgstr "Modtager"
 
-#: .\forms.py:159
+#: .\forms.py:167
 msgid "Email"
 msgstr ""
 
-#: .\forms.py:175
+#: .\forms.py:184
 msgid "Undefined recipient."
 msgstr ""
 
-#: .\forms.py:194
+#: .\forms.py:205
 msgid "Additional recipients"
 msgstr ""
 
-#: .\forms.py:194
+#: .\forms.py:205
 msgid "Additional recipient"
 msgstr ""
 
-#: .\models.py:19
+#: .\models.py:27
 msgid "Pending"
 msgstr ""
 
-#: .\models.py:20
+#: .\models.py:28
 msgid "Accepted"
 msgstr ""
 
-#: .\models.py:21 .\templates\postman\view.html.py:13
+#: .\models.py:29 .\templates\postman\view.html.py:14
 msgid "Rejected"
 msgstr ""
 
-#: .\models.py:200
+#: .\models.py:242
 msgid "subject"
 msgstr "emne"
 
-#: .\models.py:201
+#: .\models.py:243
 msgid "body"
 msgstr "indhold"
 
-#: .\models.py:202 .\models.py:284
+#: .\models.py:244 .\models.py:326
 msgid "sender"
 msgstr "afsender"
 
-#: .\models.py:203 .\models.py:308
+#: .\models.py:245 .\models.py:350
 msgid "recipient"
 msgstr "modtager"
 
-#: .\models.py:204
+#: .\models.py:246
 msgid "visitor"
 msgstr ""
 
-#: .\models.py:205
+#: .\models.py:247
 msgid "parent message"
 msgstr "stambesked"
 
-#: .\models.py:206
+#: .\models.py:248
 msgid "root message"
 msgstr ""
 
-#: .\models.py:207
+#: .\models.py:249
 msgid "sent at"
 msgstr ""
 
-#: .\models.py:208
+#: .\models.py:250
 msgid "read at"
 msgstr ""
 
-#: .\models.py:209
+#: .\models.py:251
 msgid "replied at"
 msgstr ""
 
-#: .\models.py:210
+#: .\models.py:252
 msgid "archived by sender"
 msgstr ""
 
-#: .\models.py:211
+#: .\models.py:253
 msgid "archived by recipient"
 msgstr ""
 
-#: .\models.py:212
+#: .\models.py:254
 msgid "deleted by sender at"
 msgstr ""
 
-#: .\models.py:213
+#: .\models.py:255
 msgid "deleted by recipient at"
 msgstr ""
 
-#: .\models.py:215
+#: .\models.py:257
 msgid "status"
 msgstr ""
 
-#: .\models.py:217
+#: .\models.py:259
 msgid "moderator"
 msgstr ""
 
-#: .\models.py:218
+#: .\models.py:260
 msgid "moderated at"
 msgstr ""
 
-#: .\models.py:219
+#: .\models.py:261
 msgid "rejection reason"
 msgstr ""
 
-#: .\models.py:224
+#: .\models.py:266
 msgid "message"
 msgstr "besked"
 
-#: .\models.py:225
+#: .\models.py:267
 msgid "messages"
 msgstr "beskeder"
 
-#: .\models.py:336
+#: .\models.py:378
 msgid "Undefined sender."
 msgstr ""
 
-#: .\models.py:476
+#: .\models.py:523
 msgid "pending message"
 msgstr ""
 
-#: .\models.py:477
+#: .\models.py:524
 msgid "pending messages"
 msgstr ""
 
-#: .\utils.py:32
+#: .\utils.py:37
 msgid "> "
 msgstr "> "
 
-#: .\utils.py:48
+#: .\utils.py:53
 msgid ""
 "\n"
 "\n"
@@ -250,55 +250,55 @@ msgstr ""
 "{sender} skrev:\n"
 "{body}\n"
 
-#: .\utils.py:57
+#: .\utils.py:63
 msgid "Re: {subject}"
 msgstr "SV: {subject}"
 
-#: .\views.py:129 .\views.py:189
+#: .\views.py:144 .\views.py:206
 msgid "Message successfully sent."
 msgstr "Besked sendt succesfuldt."
 
-#: .\views.py:131 .\views.py:191
+#: .\views.py:146 .\views.py:208
 msgid "Message rejected for at least one recipient."
 msgstr ""
 
-#: .\views.py:278
+#: .\views.py:299
 msgid "Select at least one object."
 msgstr ""
 
-#: .\views.py:284
+#: .\views.py:306
 msgid "Messages or conversations successfully archived."
 msgstr ""
 
-#: .\views.py:289
+#: .\views.py:312
 msgid "Messages or conversations successfully deleted."
 msgstr ""
 
-#: .\views.py:294
+#: .\views.py:318
 msgid "Messages or conversations successfully recovered."
 msgstr ""
 
-#: .\management\__init__.py:14
+#: .\management\__init__.py:15
 msgid "Message Rejected"
 msgstr ""
 
-#: .\management\__init__.py:14
+#: .\management\__init__.py:15
 msgid "Your message has been rejected"
 msgstr ""
 
-#: .\management\__init__.py:15
+#: .\management\__init__.py:16
 msgid "Message Received"
 msgstr "Besked modtaget"
 
-#: .\management\__init__.py:15
+#: .\management\__init__.py:16
 msgid "You have received a message"
 msgstr "Du har modtaget en besked"
 
-#: .\management\__init__.py:16
+#: .\management\__init__.py:17
 msgid "Reply Received"
 msgstr "Svar modtaget"
 
-#: .\management\__init__.py:16
+#: .\management\__init__.py:17
 msgid "You have received a reply"
 msgstr "Du har modtaget et svar"
 
@@ -326,81 +326,81 @@ msgid ""
 "long term storage."
 msgstr ""
 
-#: .\templates\postman\base.html.py:3
+#: .\templates\postman\base.html.py:4
 msgid "Messaging"
 msgstr ""
 
-#: .\templates\postman\base.html.py:6
+#: .\templates\postman\base.html.py:13
 msgid "Inbox"
 msgstr "Indboks"
 
-#: .\templates\postman\base.html.py:7 .\templates\postman\sent.html.py:3
+#: .\templates\postman\base.html.py:14 .\templates\postman\sent.html.py:3
 msgid "Sent Messages"
 msgstr "Sendte beskeder"
 
-#: .\templates\postman\base.html.py:8 .\templates\postman\write.html.py:3
+#: .\templates\postman\base.html.py:15 .\templates\postman\write.html.py:3
 msgid "Write"
 msgstr ""
 
-#: .\templates\postman\base.html.py:9
+#: .\templates\postman\base.html.py:16
 msgid "Archives"
 msgstr ""
 
-#: .\templates\postman\base.html.py:10
+#: .\templates\postman\base.html.py:17
 msgid "Trash"
 msgstr "Papirkurv"
 
-#: .\templates\postman\base_folder.html.py:9
+#: .\templates\postman\base_folder.html.py:16
 msgid "Sorry, this page number is invalid."
 msgstr ""
 
-#: .\templates\postman\base_folder.html.py:12
+#: .\templates\postman\base_folder.html.py:20
 msgid "by conversation"
 msgstr ""
 
-#: .\templates\postman\base_folder.html.py:13
+#: .\templates\postman\base_folder.html.py:21
 msgid "by message"
 msgstr ""
 
-#: .\templates\postman\base_folder.html.py:17
-#: .\templates\postman\view.html.py:22
+#: .\templates\postman\base_folder.html.py:25
+#: .\templates\postman\view.html.py:23
 msgid "Delete"
 msgstr "Slet"
 
-#: .\templates\postman\base_folder.html.py:18
-#: .\templates\postman\view.html.py:23
+#: .\templates\postman\base_folder.html.py:26
+#: .\templates\postman\view.html.py:24
 msgid "Archive"
 msgstr ""
 
-#: .\templates\postman\base_folder.html.py:19
+#: .\templates\postman\base_folder.html.py:27
 msgid "Undelete"
 msgstr "Genskab"
 
-#: .\templates\postman\base_folder.html.py:24
+#: .\templates\postman\base_folder.html.py:32
 msgid "Action"
 msgstr "Handling"
 
-#: .\templates\postman\base_folder.html.py:25
+#: .\templates\postman\base_folder.html.py:33
 msgid "Sender"
 msgstr "Afsender"
 
-#: .\templates\postman\base_folder.html.py:27
+#: .\templates\postman\base_folder.html.py:35
 msgid "Subject"
 msgstr "Emne"
 
-#: .\templates\postman\base_folder.html.py:28
+#: .\templates\postman\base_folder.html.py:36
 msgid "Date"
 msgstr "Dato"
 
-#: .\templates\postman\base_folder.html.py:43
+#: .\templates\postman\base_folder.html.py:51
 msgid "g:i A,M j,n/j/y"
 msgstr "G:i,j b,j/n/y"
 
-#: .\templates\postman\base_folder.html.py:51
+#: .\templates\postman\base_folder.html.py:58
 msgid "No messages."
 msgstr ""
 
-#: .\templates\postman\base_write.html.py:20
+#: .\templates\postman\base_write.html.py:33
 msgid "Send"
 msgstr "Send"
 
@@ -491,8 +491,8 @@ msgstr "Modtagne beskeder"
 msgid "Received"
 msgstr "Modtaget"
 
-#: .\templates\postman\reply.html.py:3 .\templates\postman\view.html.py:25
-#: .\templates\postman\view.html.py:28 .\templates\postman\view.html.py:31
+#: .\templates\postman\reply.html.py:3 .\templates\postman\view.html.py:26
+#: .\templates\postman\view.html.py:29 .\templates\postman\view.html.py:32
 msgid "Reply"
 msgstr "Svar"
 
@@ -510,18 +510,18 @@ msgid ""
 "storage, use instead the archive folder."
 msgstr ""
 
-#: .\templates\postman\view.html.py:5
+#: .\templates\postman\view.html.py:6
 msgid "Conversation"
 msgstr ""
 
-#: .\templates\postman\view.html.py:13
+#: .\templates\postman\view.html.py:14
 msgid ":"
 msgstr ": "
 
-#: .\templates\postman\view.html.py:20
+#: .\templates\postman\view.html.py:21
 msgid "Back"
 msgstr ""
 
-#: .\templatetags\postman_tags.py:35
+#: .\templatetags\postman_tags.py:48
 msgid "<me>"
 msgstr ""

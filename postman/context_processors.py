@@ -1,4 +1,7 @@
+from __future__ import unicode_literals
+
 from postman.models import Message
+
 
 def inbox(request):
     """Provide the count of unread messages for an authenticated user."""
