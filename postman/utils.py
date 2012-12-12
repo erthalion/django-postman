@@ -23,7 +23,7 @@ else:
 # but if not installed or not desired, fallback to django.core.mail
 name = getattr(settings, 'POSTMAN_MAILER_APP', 'mailer')
 if name and name in settings.INSTALLED_APPS:
-    send_mail = __import__(name, globals(), locals(), ['send_mail']).send_mail
+    send_mail = __import__(name, globals(), locals(), [str('send_mail')]).send_mail
 else:
     from django.core.mail import send_mail
 

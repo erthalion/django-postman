@@ -61,7 +61,7 @@ except ImportError:
     now = datetime.now
 
 from postman.api import pm_broadcast, pm_write
-from postman.fields import CommaSeparatedUserField
+# because of reload()'s, do "from postman.fields import CommaSeparatedUserField" just before needs
 # because of reload()'s, do "from postman.forms import xxForm" just before needs
 from postman.models import ORDER_BY_KEY, ORDER_BY_MAPPER, Message, PendingMessage,\
     STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED,\
@@ -76,7 +76,7 @@ class GenericTest(TestCase):
     Usual generic tests.
     """
     def test_version(self):
-        self.assertEqual(sys.modules['postman'].__version__, "2.1.0")
+        self.assertEqual(sys.modules['postman'].__version__, "2.1.1")
 
 
 class BaseTest(TestCase):
@@ -182,6 +182,7 @@ class BaseTest(TestCase):
         clear_url_caches()
         try:
             reload(sys.modules['postman.utils'])
+            reload(sys.modules['postman.fields'])
             reload(sys.modules['postman.forms'])
             reload(sys.modules['postman.views'])
             reload(sys.modules['postman.urls'])
@@ -361,6 +362,7 @@ class ViewTest(BaseTest):
 
     def test_write_post_multirecipient(self):
         "Test number of recipients constraint."
+        from postman.fields import CommaSeparatedUserField
         url = reverse('postman_write')
         data = {
             'email': 'a@b.com', 'subject': 's', 'body': 'b',
@@ -524,6 +526,7 @@ class ViewTest(BaseTest):
 
     def test_reply_post_copies(self):
         "Test number of recipients constraint."
+        from postman.fields import CommaSeparatedUserField
         pk = self.c21().pk
         url = reverse('postman_reply', args=[pk])
         data = {'subject': 's', 'body': 'b', 'recipients': self.user3.get_username()}
@@ -816,6 +819,7 @@ class FieldTest(BaseTest):
     """
     def test_label(self):
         "Test the plural/singular of the label."
+        from postman.fields import CommaSeparatedUserField
         f = CommaSeparatedUserField(label=('plural','singular'))
         self.assertEqual(f.label, 'plural')
         f.set_max(1)
@@ -833,6 +837,7 @@ class FieldTest(BaseTest):
 
     def test_to_python(self):
         "Test the conversion to a python list."
+        from postman.fields import CommaSeparatedUserField
         f = CommaSeparatedUserField()
         self.assertEqual(f.to_python(''), [])
         self.assertEqual(f.to_python('foo'), ['foo'])
@@ -844,6 +849,7 @@ class FieldTest(BaseTest):
 
     def test_clean(self):
         "Test the 'clean' validation."
+        from postman.fields import CommaSeparatedUserField
         f = CommaSeparatedUserField(required=False)
         self.assertEqual(f.clean(''), [])
         self.assertEqual(f.clean('foo'), [self.user1])
@@ -857,6 +863,7 @@ class FieldTest(BaseTest):
 
     def test_user_filter(self):
         "Test the 'user_filter' argument."
+        from postman.fields import CommaSeparatedUserField
         f = CommaSeparatedUserField(user_filter=lambda u: None)
         self.assertEqual(frozenset(f.clean('foo, bar')), frozenset([self.user1, self.user2]))
         # no reason
@@ -868,6 +875,7 @@ class FieldTest(BaseTest):
 
     def test_min(self):
         "Test the 'min' argument."
+        from postman.fields import CommaSeparatedUserField
         f = CommaSeparatedUserField(required=False, min=1)
         self.assertEqual(f.clean(''), [])
 
@@ -880,6 +888,7 @@ class FieldTest(BaseTest):
 
     def test_max(self):
         "Test the 'max' argument."
+        from postman.fields import CommaSeparatedUserField
         f = CommaSeparatedUserField(max=1)
         self.assertEqual(f.clean('foo'), [self.user1])
         self.assertRaises(ValidationError, f.clean, 'foo, bar')

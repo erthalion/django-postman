@@ -107,9 +107,9 @@ autocompleter_app = {}
 if app_name in settings.INSTALLED_APPS and arg_default:
     autocompleter_app['is_active'] = True
     autocompleter_app['name'] = app_name
-    autocompleter_app['version'] = getattr(__import__(app_name, globals(), locals(), ['__version__']), '__version__', None)
+    autocompleter_app['version'] = getattr(__import__(app_name, globals(), locals(), [str('__version__')]), '__version__', None)
     # does something like "from ajax_select.fields import AutoCompleteField"
-    auto_complete_field = getattr(__import__(app_name + '.fields', globals(), locals(), [field_name]), field_name)
+    auto_complete_field = getattr(__import__(app_name + '.fields', globals(), locals(), [str(field_name)]), field_name)
 
     class CommaSeparatedUserField(BasicCommaSeparatedUserField, auto_complete_field):
         def __init__(self, *args, **kwargs):
