@@ -65,7 +65,7 @@ from postman.api import pm_broadcast, pm_write
 # because of reload()'s, do "from postman.forms import xxForm" just before needs
 from postman.models import ORDER_BY_KEY, ORDER_BY_MAPPER, Message, PendingMessage,\
     STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED,\
-    get_user_representation
+    get_order_by, get_user_representation
 from postman.urls import OPTION_MESSAGES
 # because of reload()'s, do "from postman.utils import notification" just before needs
 from postman.utils import format_body, format_subject
@@ -1574,11 +1574,11 @@ class TagsTest(BaseTest):
         t = Template("{% load postman_tags %}{% postman_order_by " + keyword +" %}")
         r = t.render(Context({'gets': QueryDict(context)} if context else {}))
         self.assertEqual(r[0], '?')
-        self.assertEqual(set(r[1:].split('&')), set([k+'='+v for k,v in value_list]))
+        self.assertEqual(set(r[1:].split('&')), set([k+'='+v for k, v in value_list]))
 
     def test_order_by(self):
         "Test 'postman_order_by'."
-        for k,v in ORDER_BY_MAPPER.items():
+        for k, v in ORDER_BY_MAPPER.items():
             self.check_order_by(k, [(ORDER_BY_KEY, v)])
         self.check_order_by('subject', [(ORDER_BY_KEY, 's')], ORDER_BY_KEY+'=foo')
         self.check_order_by('subject', [(ORDER_BY_KEY, 'S')], ORDER_BY_KEY+'=s')
@@ -1611,6 +1611,12 @@ class UtilsTest(BaseTest):
         self.assertEqual(format_subject("foo bar"), "Re: foo bar")
         self.assertEqual(format_subject("Re: foo bar"), "Re: foo bar")
         self.assertEqual(format_subject("rE: foo bar"), "rE: foo bar")
+
+    def test_get_order_by(self):
+        "Test get_order_by()."
+        self.assertEqual(get_order_by({}), None)
+        self.assertEqual(get_order_by({ORDER_BY_KEY: 'f'}), 'sender__{0}'.format(get_user_model().USERNAME_FIELD))
+        self.assertEqual(get_order_by({ORDER_BY_KEY: 'D'}), '-sent_at')
 
     def test_get_user_representation(self):
         "Test get_user_representation()."

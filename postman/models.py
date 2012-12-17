@@ -49,12 +49,6 @@ def get_order_by(query_dict):
     Argument:
     ``query_dict``: a dictionary to look for a key dedicated to ordering purpose
 
-    >>> get_order_by({})
-
-    >>> get_order_by({ORDER_BY_KEY: 'f'})
-    u'sender__username'
-    >>> get_order_by({ORDER_BY_KEY: 'D'})
-    u'-sent_at'
     """
     if ORDER_BY_KEY in query_dict:
         code = query_dict[ORDER_BY_KEY]  # code may be uppercase or lowercase
