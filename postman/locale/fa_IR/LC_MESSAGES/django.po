@@ -1,7 +1,7 @@
 # Persian IR translation of django-postman.
 # Copyright (C) 2012 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
-#
+# 
 # Translators:
 # Alireza Savand <alireza.savand@gmail.com>, 2012.
 # Arash Fazeli <a.fazeli@gmail.com>, 2012.

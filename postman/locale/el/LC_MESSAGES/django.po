@@ -1,21 +1,23 @@
 # Greek translation of django-postman.
 # Copyright (C) 2011 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
-# provetza <mgogoulos@gmail.com>, 2011.
-#
+# 
+# Translators:
+# Patrick Samson <maxcom@laposte.net>, 2011.
+# Markos Gogoulos <mgogoulos@gmail.com>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: django-postman 1.0.x\n"
+"Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
 "POT-Creation-Date: 2012-12-10 22:57+0100\n"
 "PO-Revision-Date: 2011-04-26 18:39+0000\n"
-"Last-Translator: provetza <mgogoulos@gmail.com>\n"
+"Last-Translator: Markos Gogoulos <mgogoulos@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: el\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\admin.py:25
 msgid "Sender and Recipient cannot be both undefined."

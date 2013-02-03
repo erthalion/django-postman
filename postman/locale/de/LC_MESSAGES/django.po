@@ -1,14 +1,13 @@
 # German translation of django-postman.
 # Copyright (C) 2010 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
-#
+# 
 # Translators:
 # Patrick Samson <maxcom@laposte.net>, 2011.
 #   <simon@cowboyventure.com>, 2012.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: django-postman 1.0.x\n"
+"Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
 "POT-Creation-Date: 2012-12-10 22:54+0100\n"
 "PO-Revision-Date: 2012-05-18 13:23+0000\n"
@@ -18,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\admin.py:25
 msgid "Sender and Recipient cannot be both undefined."

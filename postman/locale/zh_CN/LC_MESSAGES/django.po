@@ -1,11 +1,12 @@
 # Chinese translation of django-postman.
 # Copyright (C) 2011 Patrick Samson
 # This file is distributed under the same license as the django-postman package.
+# 
+# Translators:
 # mikecool <genewoo@gmail.com>, 2011.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: django-postman 1.0.x\n"
+"Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
 "POT-Creation-Date: 2012-12-10 23:19+0100\n"
 "PO-Revision-Date: 2011-02-03 08:41+0000\n"
@@ -15,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: zh_CN\n"
-"Plural-Forms: nplurals=1; plural=0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: .\admin.py:25
 msgid "Sender and Recipient cannot be both undefined."
