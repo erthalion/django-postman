@@ -1301,8 +1301,9 @@ class MessageTest(BaseTest):
             self.assertEqual(mail.outbox[0].to, [email])
         from postman.utils import notification
         if notification and notice_label:
-            notice = notification.Notice.objects.get()
-            self.assertEqual(notice.notice_type.label, notice_label)
+            if hasattr(notification, "Notice"):  # exists for django-notification 0.2.0, but no more in 1.0
+                notice = notification.Notice.objects.get()
+                self.assertEqual(notice.notice_type.label, notice_label)
 
     def test_notification_rejection_visitor(self):
         "Test notify_users() for rejection, sender is a visitor."

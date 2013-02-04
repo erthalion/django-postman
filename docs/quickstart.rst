@@ -114,6 +114,8 @@ You may specify some additional configuration options in your :file:`settings.py
 
     *Defaults to*: 'notification', as in django-notification.
 
+    Note: django-notification v0.2.0 works with Django version 1.3. As of Django 1.4, switch to at least django-notification v1.0.
+
     If you already have a notifier application with the default name in the installed applications
     but you do not want it to be used by this application, set the option to None.
 
