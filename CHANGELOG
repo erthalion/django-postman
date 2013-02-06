@@ -2,10 +2,6 @@
 Django Postman changelog
 ========================
 
-Version 2.1.1, December 2012
-----------------------------
-* Fix issue #21, a missing unicode/str encoding migration
-
 Version 2.1.0, December 2012
 ----------------------------
 * Make the app compatible with the new 'Custom Auth Model' feature of Django 1.5
