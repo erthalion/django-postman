@@ -8,7 +8,10 @@ except ImportError:
     from postman.future_1_5 import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.text import truncate_words
+try:
+    from django.utils.text import Truncator  # Django 1.4
+except ImportError:
+    from postman.future_1_4 import Truncator
 from django.utils.translation import ugettext, ugettext_lazy as _
 try:
     from django.utils.timezone import now  # Django 1.4 aware datetimes
@@ -262,7 +265,7 @@ class Message(models.Model):
         ordering = ['-sent_at', '-id']
 
     def __unicode__(self):
-        return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, truncate_words(self.subject,5))
+        return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, Truncator(self.subject).words(5))
 
     @models.permalink
     def get_absolute_url(self):

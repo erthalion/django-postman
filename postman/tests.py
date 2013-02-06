@@ -1094,6 +1094,14 @@ class MessageTest(BaseTest):
         self.check_parties(m, s=self.user1, email=self.email              )
         self.check_parties(m,               email=self.email, r=self.user2)
 
+    def test_representation(self):
+        "Test the message representation as text."
+        m = Message(sender=self.user1, recipient=self.user2)
+        m.subject = 'one two three four last'
+        self.assertEqual(str(m), 'foo>bar:one two three four last')
+        m.subject = 'one two three four last over'
+        self.assertEqual(str(m), 'foo>bar:one two three four last...')
+
     def test_status(self):
         "Test status."
         m = Message.objects.create(subject='s')
