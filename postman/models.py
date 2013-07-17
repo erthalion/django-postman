@@ -8,6 +8,7 @@ except ImportError:
     from postman.future_1_5 import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.query import QuerySet
 try:
     from django.utils.text import Truncator  # Django 1.4
 except ImportError:
@@ -19,6 +20,7 @@ except ImportError:
     from datetime import datetime
     now = datetime.now
 
+from postman.query import PostmanQuery
 from postman.urls import OPTION_MESSAGES
 from postman.utils import email_visitor, notify_user
 
@@ -40,9 +42,6 @@ ORDER_BY_FIELDS = {
     'd': 'sent_at',  # as 'date'
 }
 ORDER_BY_MAPPER = {'sender': 'f', 'recipient': 't', 'subject': 's', 'date': 'd'}  # for templatetags usage
-
-dbms = settings.DATABASES['default']['ENGINE'].rsplit('.', 1)[-1]
-QUOTE_CHAR = '`' if dbms == 'mysql' else '"'
 
 
 def get_order_by(query_dict):
@@ -84,18 +83,11 @@ def get_user_representation(user):
 class MessageManager(models.Manager):
     """The manager for Message."""
 
-    @property
-    def _last_in_thread(self):
-        """Return the latest message id for each conversation."""
-        return self.filter(thread__isnull=False).values('thread').annotate(models.Max('pk'))\
-            .values_list('pk__max', flat=True).order_by()
-
     def _folder(self, related, filters, option=None, order_by=None):
         """Base code, in common to the folders."""
+        qs = self.all() if option == OPTION_MESSAGES else QuerySet(self.model, PostmanQuery(self.model), using=self._db)
         if related:
-            qs = self.select_related(*related)
-        else:
-            qs = self.all()
+            qs = qs.select_related(*related)
         if order_by:
             qs = qs.order_by(order_by)
         if isinstance(filters, (list, tuple)):
@@ -110,15 +102,14 @@ class MessageManager(models.Manager):
             # should not be necessary. Otherwise add:
             # .extra(select={'count': 'SELECT 1'})
         else:
-            return qs.filter(
-                models.Q(id__in=self._last_in_thread.filter(lookups)) | models.Q(lookups, thread__isnull=True)
-            ).extra(select={'count': QUOTE_CHAR.join([
-            'SELECT COUNT(*) FROM ', 'postman_message', ' T'
-            ' WHERE T.', 'thread_id', ' = ', 'postman_message', '.', 'thread_id', ' '
-            ])})
-            # For single message, 'count' is returned as 0. Should be acceptable if known.
-            # If not, replace "COUNT(*)" by "1+COUNT(*)" and add:
-            # ' AND T."id" <> T."thread_id"'
+            qs = qs.extra(select={'count': '{0}.count'.format(qs.query.pm_alias_prefix)})
+            qs.query.pm_set_extra(table=(
+                self.filter(lookups, thread_id__isnull=True).extra(select={'count': 0})\
+                    .values_list('id', 'count').order_by(),
+                self.filter(lookups, thread_id__isnull=False).values('thread').annotate(id=models.Max('pk'), count=models.Count('pk'))\
+                    .values_list('id', 'count').order_by(),
+            ))
+            return qs
 
     def inbox(self, user, related=True, **kwargs):
         """

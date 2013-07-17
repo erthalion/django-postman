@@ -2,14 +2,23 @@
 Django Postman changelog
 ========================
 
+Version 3.0.0, July 2013
+------------------------
+* !MAJOR! Redesign the DB queries for the 'by conversation' mode,
+	to fix the performances problem of issue #15.
+	Note that the counting of messages by thread is no more global (all folders)
+	but is now limited to the only targeted folder.
+* Extend the support of django-notification from version 0.2.0 to 1.0. 
+* Avoid the 'Enter text to search.' help text imposed in version 1.2.5 of ajax_select.
+
 Version 2.1.1, December 2012
 ----------------------------
-* Fix issue #21, a missing unicode/str encoding migration
+* Fix issue #21, a missing unicode/str encoding migration.
 
 Version 2.1.0, December 2012
 ----------------------------
-* Make the app compatible with the new 'Custom Auth Model' feature of Django 1.5
-* Add a setting: POSTMAN_SHOW_USER_AS
+* Make the app compatible with the new 'Custom Auth Model' feature of Django 1.5.
+* Add a setting: POSTMAN_SHOW_USER_AS.
 * Remove the dependency to django-pagination in the default template set.
 * Add an optional auto_moderators parameter to the pm_write() API function.
 * Add a template for the autocomplete of multiple recipients in version 1.2.x of django-ajax-selects.

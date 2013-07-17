@@ -76,7 +76,7 @@ class GenericTest(TestCase):
     Usual generic tests.
     """
     def test_version(self):
-        self.assertEqual(sys.modules['postman'].__version__, "2.2.0a1")
+        self.assertEqual(sys.modules['postman'].__version__, "3.0.0a1")
 
 
 class BaseTest(TestCase):
@@ -985,10 +985,10 @@ class MessageManagerTest(BaseTest):
         self.assertQuerysetEqual(Message.objects.trash(self.user1, option=OPTION_MESSAGES), [], transform=pk)
         self.assertQuerysetEqual(Message.objects.trash(self.user2, option=OPTION_MESSAGES), [], transform=pk)
         # by conversations
-        self.assertQuerysetEqual(Message.objects.sent(self.user1), [(m7.pk,0),(m6.pk,0),(m5.pk,3),(m2.pk,0),(m1.pk,0)], transform=pk_cnt)
-        self.assertQuerysetEqual(Message.objects.sent(self.user2), [(m10.pk,0),(m9.pk,0),(m8.pk,0),(m4.pk,3)], transform=pk_cnt)
-        self.assertQuerysetEqual(Message.objects.inbox(self.user1), [(m8.pk,0),(m4.pk,3)], transform=pk_cnt)
-        self.assertQuerysetEqual(Message.objects.inbox(self.user2), [(m7.pk,0),(m6.pk,0),(m5.pk,3)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.sent(self.user1), [(m7.pk,0),(m6.pk,0),(m5.pk,2),(m2.pk,0),(m1.pk,0)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.sent(self.user2), [(m10.pk,0),(m9.pk,0),(m8.pk,0),(m4.pk,1)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.inbox(self.user1), [(m8.pk,0),(m4.pk,1)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.inbox(self.user2), [(m7.pk,0),(m6.pk,0),(m5.pk,2)], transform=pk_cnt)
 
         self.assertQuerysetEqual(Message.objects.thread(self.user1, Q(thread=m3.pk)), [m3.pk,m4.pk,m5.pk], transform=pk)
         self.assertQuerysetEqual(Message.objects.thread(self.user1, Q(pk=m4.pk)), [m4.pk], transform=pk)
@@ -1031,10 +1031,10 @@ class MessageManagerTest(BaseTest):
         self.assertQuerysetEqual(Message.objects.inbox(self.user1, option=OPTION_MESSAGES), [m4.pk], transform=pk)
         self.assertQuerysetEqual(Message.objects.inbox(self.user2, option=OPTION_MESSAGES), [m5.pk,m3.pk], transform=pk)
         # by conversations
-        self.assertQuerysetEqual(Message.objects.sent(self.user1), [(m7.pk,0),(m5.pk,3)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.sent(self.user1), [(m7.pk,0),(m5.pk,1)], transform=pk_cnt)
         self.assertQuerysetEqual(Message.objects.sent(self.user2), [(m8.pk,0)], transform=pk_cnt)
-        self.assertQuerysetEqual(Message.objects.inbox(self.user1), [(m4.pk,3)], transform=pk_cnt)
-        self.assertQuerysetEqual(Message.objects.inbox(self.user2), [(m5.pk,3)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.inbox(self.user1), [(m4.pk,1)], transform=pk_cnt)
+        self.assertQuerysetEqual(Message.objects.inbox(self.user2), [(m5.pk,2)], transform=pk_cnt)
 
         self.assertQuerysetEqual(Message.objects.thread(self.user1, Q(thread=m3.pk)), [m3.pk,m4.pk,m5.pk], transform=pk)
         self.assertQuerysetEqual(Message.objects.thread(self.user1, Q(pk=m4.pk)), [m4.pk], transform=pk)
