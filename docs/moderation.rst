@@ -21,7 +21,7 @@ You may automate the moderation by giving zero, one, or many auto-moderator func
 to the views.  The value of the parameter can be one single function or a sequence of
 functions as a tuple or a list.
 
-Views supporting an ``auto-moderators`` parameter are: ``write``, ``reply``.
+Views supporting an ``auto-moderators`` parameter are: ``WriteView``, ``ReplyView``.
 
 Example::
 
@@ -36,10 +36,12 @@ Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'auto_moderators': (mod1, mod2)}, name='postman_write'),
-        url(r'^reply/(?P<message_id>[\d]+)/$', 'reply',
-            {'auto_moderators': mod1}, name='postman_reply'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(auto_moderators=(mod1, mod2)),
+            name='postman_write'),
+        url(r'^reply/(?P<message_id>[\d]+)/$',
+            ReplyView.as_view(auto_moderators=mod1),
+            name='postman_reply'),
         # ...
     )
 
@@ -78,5 +80,3 @@ At the end of the loop, if the decision is not final, the sequence is:
 #. An average rating is computed: if greater or equal to 50, the message is accepted.
 #. The message is rejected. The final reason is a comma separated collection of reasons
    coming from moderators having returned a rating lesser than 50.
-
-

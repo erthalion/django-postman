@@ -8,6 +8,7 @@ Version 3.0.0, July 2013
 	to fix the performances problem of issue #15.
 	Note that the counting of messages by thread is no more global (all folders)
 	but is now limited to the only targeted folder.
+* Convert all function-based views to class-based views.
 * Extend the support of django-notification from version 0.2.0 to 1.0. 
 * Avoid the 'Enter text to search.' help text imposed in version 1.2.5 of ajax_select.
 

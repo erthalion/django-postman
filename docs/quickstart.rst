@@ -12,11 +12,11 @@ Some reasons:
 
 * use of ``str.format()``
 
-Django version >= 1.2.2
+Django version >= 1.3
 
 Some reasons:
 
-* use of ``self.stdout`` in management commands
+* use of class-based views
 
 Installation
 ------------
@@ -157,11 +157,6 @@ Permute the comment tags for the lines denoted by the marks: {# dj v1.x #} in:
 
 * base_write.html
 
-In case you run a Django 1.2 version, perform these additional steps for any template:
-
-* Remove {% load url from future %}
-* Change any {% url 'XX' %} to {% url XX %}
-
 Relations between templates::
 
     base.html
@@ -212,18 +207,6 @@ These files are provided under :file:`postman/static/`.
 See also :ref:`styles` for the stylesheets of views.
 
 For Django 1.3+, just follow the instructions related to the staticfiles app.
-
-For Django 1.2:
-	It's up to you to make the files visible to the URL resolver.
-
-	For example:
-
-	* Rename the path to :file:`postman/medias/`
-	* In a production environment, set :file:`/<MEDIA_ROOT>/postman/` as a symlink to :file:`<Postman_module>/medias/postman/`
-	* In a development environment (django's runserver), you can put in the URLconf, something like::
-
-		('^' + settings.MEDIA_URL.strip('/') + r'/(?P<path>postman/.*)$', 'django.views.static.serve',
-			{'document_root': os.path.join(imp.find_module('postman')[1], 'medias')}),
 
 Examples
 --------

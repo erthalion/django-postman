@@ -53,22 +53,22 @@ from django.template import Template, Context, TemplateSyntaxError, TemplateDoes
 from django.test import TestCase
 from django.utils.encoding import force_unicode
 from django.utils.formats import localize
-from django.utils.translation import deactivate
 try:
     from django.utils.timezone import now  # Django 1.4 aware datetimes
 except ImportError:
     from datetime import datetime
     now = datetime.now
+from django.utils.translation import deactivate
 
-from postman.api import pm_broadcast, pm_write
+from . import OPTION_MESSAGES
+from .api import pm_broadcast, pm_write
 # because of reload()'s, do "from postman.fields import CommaSeparatedUserField" just before needs
 # because of reload()'s, do "from postman.forms import xxForm" just before needs
-from postman.models import ORDER_BY_KEY, ORDER_BY_MAPPER, Message, PendingMessage,\
-    STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED,\
-    get_order_by, get_user_representation
-from postman.urls import OPTION_MESSAGES
+from .models import ORDER_BY_KEY, ORDER_BY_MAPPER, Message, PendingMessage,\
+        STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED,\
+        get_order_by, get_user_representation
 # because of reload()'s, do "from postman.utils import notification" just before needs
-from postman.utils import format_body, format_subject
+from .utils import format_body, format_subject
 
 
 class GenericTest(TestCase):
@@ -76,7 +76,7 @@ class GenericTest(TestCase):
     Usual generic tests.
     """
     def test_version(self):
-        self.assertEqual(sys.modules['postman'].__version__, "3.0.0a1")
+        self.assertEqual(sys.modules['postman'].__version__, "3.0.0")
 
 
 class BaseTest(TestCase):
@@ -734,7 +734,7 @@ class ViewTest(BaseTest):
 
         # not a POST
         response = self.client.get(url, data)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 405)
         # not yours
         self.assert_(self.client.login(username='baz', password='pass'))
         response = self.client.post(url, data)
@@ -758,7 +758,7 @@ class ViewTest(BaseTest):
 
         # not a POST
         response = self.client.get(url, data)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 405)
         # not yours
         self.assert_(self.client.login(username='baz', password='pass'))
         response = self.client.post(url, data)

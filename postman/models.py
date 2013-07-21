@@ -13,16 +13,16 @@ try:
     from django.utils.text import Truncator  # Django 1.4
 except ImportError:
     from postman.future_1_4 import Truncator
-from django.utils.translation import ugettext, ugettext_lazy as _
 try:
     from django.utils.timezone import now  # Django 1.4 aware datetimes
 except ImportError:
     from datetime import datetime
     now = datetime.now
+from django.utils.translation import ugettext, ugettext_lazy as _
 
-from postman.query import PostmanQuery
-from postman.urls import OPTION_MESSAGES
-from postman.utils import email_visitor, notify_user
+from . import OPTION_MESSAGES
+from .query import PostmanQuery
+from .utils import email_visitor, notify_user
 
 # moderation constants
 STATUS_PENDING = 'p'

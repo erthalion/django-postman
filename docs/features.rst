@@ -35,7 +35,7 @@ you can pass the optional ``max`` parameter to the view.
 There is no parameter for a minimum number, but you can code a custom form
 and pass a ``min`` parameter to the recipient field (see Advanced Usage below for details).
 
-Views supporting the parameter are: ``write``, ``reply``.
+Views supporting the parameter are: ``WriteView``, ``ReplyView``.
 
 But this parameter does not apply to the default ``AnonymousWriteForm`` for visitors:
 The maximum is enforced to 1 (see Advanced Usage below for knowing how),
@@ -45,8 +45,9 @@ Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'max': 3}, name='postman_write'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(max=3),
+            name='postman_write'),
         # ...
     )
 
@@ -81,7 +82,7 @@ User filter
 If there are some situations where a user should not be a recipient, you can write a filter
 and pass it to the view.
 
-Views supporting a user filter are: ``write``, ``reply``.
+Views supporting a user filter are: ``WriteView``, ``ReplyView``.
 
 Example::
 
@@ -92,8 +93,9 @@ Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'user_filter': my_user_filter}, name='postman_write'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(user_filter=my_user_filter),
+            name='postman_write'),
         # ...
     )
 
@@ -139,7 +141,7 @@ If there are some situations where an exchange should not take place, you can wr
 and pass it to the view.
 Typical usages would be: blacklists, users that do not want solicitation from visitors.
 
-Views supporting an exchange filter are: ``write``, ``reply``.
+Views supporting an exchange filter are: ``WriteView``, ``ReplyView``.
 
 An example, with the django-relationships application::
 
@@ -150,8 +152,9 @@ An example, with the django-relationships application::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'exchange_filter': my_exchange_filter}, name='postman_write'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(exchange_filter=my_exchange_filter),
+            name='postman_write'),
         # ...
     )
 
@@ -242,26 +245,28 @@ Customization
 
 You may attach a specific channel, different from the default one, to a particular view.
 
-Views supporting an auto-complete parameter are: ``write``, ``reply``.
+Views supporting an auto-complete parameter are: ``WriteView``, ``ReplyView``.
 
-For the ``write`` view, the parameter is named ``autocomplete_channels`` (note the plural).
+For the ``WriteView`` view, the parameter is named ``autocomplete_channels`` (note the plural).
 It supports two variations:
 
 * a 2-tuple of channels names: the first one for authenticated users, the second for visitors.
   Specify ``None`` if you let the default channel name for one of the tuple parts.
 * a single channel name: the same for users and visitors
 
-For the ``reply`` view, the parameter is named ``autocomplete_channel`` (note the singular).
+For the ``ReplyView`` view, the parameter is named ``autocomplete_channel`` (note the singular).
 The value is the channel name.
 
 Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'autocomplete_channels': (None,'anonymous_ac')}, name='postman_write'),
-        url(r'^reply/(?P<message_id>[\d]+)/$', 'reply',
-            {'autocomplete_channel': 'reply_ac'}, name='postman_reply'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(autocomplete_channels=(None,'anonymous_ac')),
+            name='postman_write'),
+        url(r'^reply/(?P<message_id>[\d]+)/$',
+            ReplyView.as_view(autocomplete_channel='reply_ac'),
+            name='postman_reply'),
         # ...
     )
 
@@ -269,8 +274,9 @@ Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'autocomplete_channels': 'write_ac'}, name='postman_write'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(autocomplete_channels='write_ac'), 
+            name='postman_write'),
         # ...
     )
 

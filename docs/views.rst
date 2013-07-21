@@ -25,12 +25,15 @@ Examples::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write',
-            {'form_classes': (MyCustomWriteForm, MyCustomAnonymousWriteForm)}, name='postman_write'),
-        url(r'^reply/(?P<message_id>[\d]+)/$', 'reply',
-            {'form_class': MyCustomFullReplyForm}, name='postman_reply'),
-        url(r'^view/(?P<message_id>[\d]+)/$', 'view',
-            {'form_class': MyCustomQuickReplyForm}, name='postman_view'),
+        url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$',
+            WriteView.as_view(form_classes=(MyCustomWriteForm, MyCustomAnonymousWriteForm)),
+            name='postman_write'),
+        url(r'^reply/(?P<message_id>[\d]+)/$',
+            ReplyView.as_view(form_class=MyCustomFullReplyForm),
+            name='postman_reply'),
+        url(r'^view/(?P<message_id>[\d]+)/$',
+            MessageView.as_view(form_class=MyCustomQuickReplyForm),
+            name='postman_view'),
         # ...
     )
 
@@ -43,8 +46,9 @@ Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^view/(?P<message_id>[\d]+)/$', 'view',
-            {'template_name': 'my_custom_view.html'}, name='postman_view'),
+        url(r'^view/(?P<message_id>[\d]+)/$',
+            MessageView.as_view(template_name='my_custom_view.html'),
+            name='postman_view'),
         # ...
     )
 
@@ -62,18 +66,19 @@ The default algorithm is:
 
 The parameter ``success_url`` is available to these views:
 
-* ``write``
-* ``reply``
-* ``archive``
-* ``delete``
-* ``undelete``
+* ``WriteView``
+* ``ReplyView``
+* ``ArchiveView``
+* ``DeleteView``
+* ``UndeleteView``
 
 Example::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^reply/(?P<message_id>[\d]+)/$', 'reply',
-            {'success_url': 'postman_inbox'}, name='postman_reply'),
+        url(r'^reply/(?P<message_id>[\d]+)/$',
+            ReplyView.as_view(success_url='postman_inbox'),
+            name='postman_reply'),
         # ...
     )
 
@@ -96,9 +101,11 @@ Examples::
 
     urlpatterns = patterns('postman.views',
         # ...
-        url(r'^reply/(?P<message_id>[\d]+)/$', 'reply',
-            {'formatters': (format_subject,format_body)}, name='postman_reply'),
-        url(r'^view/(?P<message_id>[\d]+)/$', 'view',
-            {'formatters': (format_subject,format_body)}, name='postman_view'),
+        url(r'^reply/(?P<message_id>[\d]+)/$',
+            ReplyView.as_view(formatters=(format_subject, format_body)),
+            name='postman_reply'),
+        url(r'^view/(?P<message_id>[\d]+)/$',
+            MessageView.as_view(formatters=(format_subject, format_body)),
+            name='postman_view'),
         # ...
     )

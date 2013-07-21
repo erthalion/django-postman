@@ -9,14 +9,13 @@ try:
     from django.conf.urls import patterns, include, url  # django 1.4
 except ImportError:
     from django.conf.urls.defaults import *  # "patterns, include, url" is enough for django 1.3, "*" for django 1.2
-try:
-    from django.contrib.auth import get_user_model  # Django 1.5
-except ImportError:
-    from postman.future_1_5 import get_user_model
 from django.forms import ValidationError
 from django.views.generic.base import RedirectView
 
-from postman.urls import OPTIONS
+from . import OPTIONS
+from .views import (InboxView, SentView, ArchivesView, TrashView,
+        WriteView, ReplyView, MessageView, ConversationView,
+        ArchiveView, DeleteView, UndeleteView)
 
 
 # user_filter function set
@@ -62,67 +61,67 @@ def format_body(sender, body):
 
 postman_patterns = patterns('postman.views',
     # Basic set
-    url(r'^inbox/(?:(?P<option>'+OPTIONS+')/)?$', 'inbox', name='postman_inbox'),
-    url(r'^sent/(?:(?P<option>'+OPTIONS+')/)?$', 'sent', name='postman_sent'),
-    url(r'^archives/(?:(?P<option>'+OPTIONS+')/)?$', 'archives', name='postman_archives'),
-    url(r'^trash/(?:(?P<option>'+OPTIONS+')/)?$', 'trash', name='postman_trash'),
-    url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', name='postman_write'),
-    url(r'^reply/(?P<message_id>[\d]+)/$', 'reply', name='postman_reply'),
-    url(r'^view/(?P<message_id>[\d]+)/$', 'view', name='postman_view'),
-    url(r'^view/t/(?P<thread_id>[\d]+)/$', 'view_conversation', name='postman_view_conversation'),
-    url(r'^archive/$', 'archive', name='postman_archive'),
-    url(r'^delete/$', 'delete', name='postman_delete'),
-    url(r'^undelete/$', 'undelete', name='postman_undelete'),
+    url(r'^inbox/(?:(?P<option>'+OPTIONS+')/)?$', InboxView.as_view(), name='postman_inbox'),
+    url(r'^sent/(?:(?P<option>'+OPTIONS+')/)?$', SentView.as_view(), name='postman_sent'),
+    url(r'^archives/(?:(?P<option>'+OPTIONS+')/)?$', ArchivesView.as_view(), name='postman_archives'),
+    url(r'^trash/(?:(?P<option>'+OPTIONS+')/)?$', TrashView.as_view(), name='postman_trash'),
+    url(r'^write/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(), name='postman_write'),
+    url(r'^reply/(?P<message_id>[\d]+)/$', ReplyView.as_view(), name='postman_reply'),
+    url(r'^view/(?P<message_id>[\d]+)/$', MessageView.as_view(), name='postman_view'),
+    url(r'^view/t/(?P<thread_id>[\d]+)/$', ConversationView.as_view(), name='postman_view_conversation'),
+    url(r'^archive/$', ArchiveView.as_view(), name='postman_archive'),
+    url(r'^delete/$', DeleteView.as_view(), name='postman_delete'),
+    url(r'^undelete/$', UndeleteView.as_view(), name='postman_undelete'),
     (r'^$', RedirectView.as_view(url='inbox/')),
 
     # Customized set
     # 'success_url'
-    url(r'^write_sent/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'success_url': 'postman_sent'}, name='postman_write_with_success_url_to_sent'),
-    url(r'^reply_sent/(?P<message_id>[\d]+)/$', 'reply', {'success_url': 'postman_sent'}, name='postman_reply_with_success_url_to_sent'),
-    url(r'^archive_arch/$', 'archive', {'success_url': 'postman_archives'}, name='postman_archive_with_success_url_to_archives'),
-    url(r'^delete_arch/$', 'delete', {'success_url': 'postman_archives'}, name='postman_delete_with_success_url_to_archives'),
-    url(r'^undelete_arch/$', 'undelete', {'success_url': 'postman_archives'}, name='postman_undelete_with_success_url_to_archives'),
+    url(r'^write_sent/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(success_url='postman_sent'), name='postman_write_with_success_url_to_sent'),
+    url(r'^reply_sent/(?P<message_id>[\d]+)/$', ReplyView.as_view(success_url='postman_sent'), name='postman_reply_with_success_url_to_sent'),
+    url(r'^archive_arch/$', ArchiveView.as_view(success_url='postman_archives'), name='postman_archive_with_success_url_to_archives'),
+    url(r'^delete_arch/$', DeleteView.as_view(success_url='postman_archives'), name='postman_delete_with_success_url_to_archives'),
+    url(r'^undelete_arch/$', UndeleteView.as_view(success_url='postman_archives'), name='postman_undelete_with_success_url_to_archives'),
     # 'max'
-    url(r'^write_max/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'max': 1}, name='postman_write_with_max'),
-    url(r'^reply_max/(?P<message_id>[\d]+)/$', 'reply', {'max': 1}, name='postman_reply_with_max'),
+    url(r'^write_max/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(max=1), name='postman_write_with_max'),
+    url(r'^reply_max/(?P<message_id>[\d]+)/$', ReplyView.as_view(max=1), name='postman_reply_with_max'),
     # 'user_filter' on write
-    url(r'^write_user_filter_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'user_filter': user_filter_reason}, name='postman_write_with_user_filter_reason'),
-    url(r'^write_user_filter_no_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'user_filter': user_filter_no_reason}, name='postman_write_with_user_filter_no_reason'),
-    url(r'^write_user_filter_false/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'user_filter': user_filter_false}, name='postman_write_with_user_filter_false'),
-    url(r'^write_user_filter_exception/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'user_filter': user_filter_exception}, name='postman_write_with_user_filter_exception'),
+    url(r'^write_user_filter_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(user_filter=user_filter_reason), name='postman_write_with_user_filter_reason'),
+    url(r'^write_user_filter_no_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(user_filter=user_filter_no_reason), name='postman_write_with_user_filter_no_reason'),
+    url(r'^write_user_filter_false/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(user_filter=user_filter_false), name='postman_write_with_user_filter_false'),
+    url(r'^write_user_filter_exception/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(user_filter=user_filter_exception), name='postman_write_with_user_filter_exception'),
     # 'user_filter' on reply
-    url(r'^reply_user_filter_reason/(?P<message_id>[\d]+)/$', 'reply', {'user_filter': user_filter_reason}, name='postman_reply_with_user_filter_reason'),
-    url(r'^reply_user_filter_no_reason/(?P<message_id>[\d]+)/$', 'reply', {'user_filter': user_filter_no_reason}, name='postman_reply_with_user_filter_no_reason'),
-    url(r'^reply_user_filter_false/(?P<message_id>[\d]+)/$', 'reply', {'user_filter': user_filter_false}, name='postman_reply_with_user_filter_false'),
-    url(r'^reply_user_filter_exception/(?P<message_id>[\d]+)/$', 'reply', {'user_filter': user_filter_exception}, name='postman_reply_with_user_filter_exception'),
+    url(r'^reply_user_filter_reason/(?P<message_id>[\d]+)/$', ReplyView.as_view(user_filter=user_filter_reason), name='postman_reply_with_user_filter_reason'),
+    url(r'^reply_user_filter_no_reason/(?P<message_id>[\d]+)/$', ReplyView.as_view(user_filter=user_filter_no_reason), name='postman_reply_with_user_filter_no_reason'),
+    url(r'^reply_user_filter_false/(?P<message_id>[\d]+)/$', ReplyView.as_view(user_filter=user_filter_false), name='postman_reply_with_user_filter_false'),
+    url(r'^reply_user_filter_exception/(?P<message_id>[\d]+)/$', ReplyView.as_view(user_filter=user_filter_exception), name='postman_reply_with_user_filter_exception'),
     # 'exchange_filter' on write
-    url(r'^write_exch_filter_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'exchange_filter': exch_filter_reason}, name='postman_write_with_exch_filter_reason'),
-    url(r'^write_exch_filter_no_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'exchange_filter': exch_filter_no_reason}, name='postman_write_with_exch_filter_no_reason'),
-    url(r'^write_exch_filter_false/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'exchange_filter': exch_filter_false}, name='postman_write_with_exch_filter_false'),
-    url(r'^write_exch_filter_exception/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'exchange_filter': exch_filter_exception}, name='postman_write_with_exch_filter_exception'),
+    url(r'^write_exch_filter_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(exchange_filter=exch_filter_reason), name='postman_write_with_exch_filter_reason'),
+    url(r'^write_exch_filter_no_reason/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(exchange_filter=exch_filter_no_reason), name='postman_write_with_exch_filter_no_reason'),
+    url(r'^write_exch_filter_false/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(exchange_filter=exch_filter_false), name='postman_write_with_exch_filter_false'),
+    url(r'^write_exch_filter_exception/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(exchange_filter=exch_filter_exception), name='postman_write_with_exch_filter_exception'),
     # 'exchange_filter' on reply
-    url(r'^reply_exch_filter_reason/(?P<message_id>[\d]+)/$', 'reply', {'exchange_filter': exch_filter_reason}, name='postman_reply_with_exch_filter_reason'),
-    url(r'^reply_exch_filter_no_reason/(?P<message_id>[\d]+)/$', 'reply', {'exchange_filter': exch_filter_no_reason}, name='postman_reply_with_exch_filter_no_reason'),
-    url(r'^reply_exch_filter_false/(?P<message_id>[\d]+)/$', 'reply', {'exchange_filter': exch_filter_false}, name='postman_reply_with_exch_filter_false'),
-    url(r'^reply_exch_filter_exception/(?P<message_id>[\d]+)/$', 'reply', {'exchange_filter': exch_filter_exception}, name='postman_reply_with_exch_filter_exception'),
+    url(r'^reply_exch_filter_reason/(?P<message_id>[\d]+)/$', ReplyView.as_view(exchange_filter=exch_filter_reason), name='postman_reply_with_exch_filter_reason'),
+    url(r'^reply_exch_filter_no_reason/(?P<message_id>[\d]+)/$', ReplyView.as_view(exchange_filter=exch_filter_no_reason), name='postman_reply_with_exch_filter_no_reason'),
+    url(r'^reply_exch_filter_false/(?P<message_id>[\d]+)/$', ReplyView.as_view(exchange_filter=exch_filter_false), name='postman_reply_with_exch_filter_false'),
+    url(r'^reply_exch_filter_exception/(?P<message_id>[\d]+)/$', ReplyView.as_view(exchange_filter=exch_filter_exception), name='postman_reply_with_exch_filter_exception'),
     # 'auto_moderators'
-    url(r'^write_moderate/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'auto_moderators': (moderate_as_51,moderate_as_48)}, name='postman_write_moderate'),
-    url(r'^reply_moderate/(?P<message_id>[\d]+)/$', 'reply', {'auto_moderators': (moderate_as_51,moderate_as_48)}, name='postman_reply_moderate'),
+    url(r'^write_moderate/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(auto_moderators=(moderate_as_51,moderate_as_48)), name='postman_write_moderate'),
+    url(r'^reply_moderate/(?P<message_id>[\d]+)/$', ReplyView.as_view(auto_moderators=(moderate_as_51,moderate_as_48)), name='postman_reply_moderate'),
     # 'formatters'
-    url(r'^reply_formatters/(?P<message_id>[\d]+)/$', 'reply', {'formatters': (format_subject,format_body)}, name='postman_reply_formatters'),
-    url(r'^view_formatters/(?P<message_id>[\d]+)/$', 'view', {'formatters': (format_subject,format_body)}, name='postman_view_formatters'),
+    url(r'^reply_formatters/(?P<message_id>[\d]+)/$', ReplyView.as_view(formatters=(format_subject, format_body)), name='postman_reply_formatters'),
+    url(r'^view_formatters/(?P<message_id>[\d]+)/$', MessageView.as_view(formatters=(format_subject, format_body)), name='postman_view_formatters'),
     # auto-complete
-    url(r'^write_ac/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'autocomplete_channels': ('postman_multiple_as1-1', None)}, name='postman_write_auto_complete'),
-    url(r'^reply_ac/(?P<message_id>[\d]+)/$', 'reply', {'autocomplete_channel': 'postman_multiple_as1-1'}, name='postman_reply_auto_complete'),
+    url(r'^write_ac/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(autocomplete_channels=('postman_multiple_as1-1', None)), name='postman_write_auto_complete'),
+    url(r'^reply_ac/(?P<message_id>[\d]+)/$', ReplyView.as_view(autocomplete_channel='postman_multiple_as1-1'), name='postman_reply_auto_complete'),
     # 'template_name'
-    url(r'^inbox_template/(?:(?P<option>'+OPTIONS+')/)?$', 'inbox', {'template_name': 'postman/fake.html'}, name='postman_inbox_template'),
-    url(r'^sent_template/(?:(?P<option>'+OPTIONS+')/)?$', 'sent', {'template_name': 'postman/fake.html'}, name='postman_sent_template'),
-    url(r'^archives_template/(?:(?P<option>'+OPTIONS+')/)?$', 'archives', {'template_name': 'postman/fake.html'}, name='postman_archives_template'),
-    url(r'^trash_template/(?:(?P<option>'+OPTIONS+')/)?$', 'trash', {'template_name': 'postman/fake.html'}, name='postman_trash_template'),
-    url(r'^write_template/(?:(?P<recipients>[\w.@+-:]+)/)?$', 'write', {'template_name': 'postman/fake.html'}, name='postman_write_template'),
-    url(r'^reply_template/(?P<message_id>[\d]+)/$', 'reply', {'template_name': 'postman/fake.html'}, name='postman_reply_template'),
-    url(r'^view_template/(?P<message_id>[\d]+)/$', 'view', {'template_name': 'postman/fake.html'}, name='postman_view_template'),
-    url(r'^view_template/t/(?P<thread_id>[\d]+)/$', 'view_conversation', {'template_name': 'postman/fake.html'}, name='postman_view_conversation_template'),
+    url(r'^inbox_template/(?:(?P<option>'+OPTIONS+')/)?$', InboxView.as_view(template_name='postman/fake.html'), name='postman_inbox_template'),
+    url(r'^sent_template/(?:(?P<option>'+OPTIONS+')/)?$', SentView.as_view(template_name='postman/fake.html'), name='postman_sent_template'),
+    url(r'^archives_template/(?:(?P<option>'+OPTIONS+')/)?$', ArchivesView.as_view(template_name='postman/fake.html'), name='postman_archives_template'),
+    url(r'^trash_template/(?:(?P<option>'+OPTIONS+')/)?$', TrashView.as_view(template_name='postman/fake.html'), name='postman_trash_template'),
+    url(r'^write_template/(?:(?P<recipients>[\w.@+-:]+)/)?$', WriteView.as_view(template_name='postman/fake.html'), name='postman_write_template'),
+    url(r'^reply_template/(?P<message_id>[\d]+)/$', ReplyView.as_view(template_name='postman/fake.html'), name='postman_reply_template'),
+    url(r'^view_template/(?P<message_id>[\d]+)/$', MessageView.as_view(template_name='postman/fake.html'), name='postman_view_template'),
+    url(r'^view_template/t/(?P<thread_id>[\d]+)/$', ConversationView.as_view(template_name='postman/fake.html'), name='postman_view_conversation_template'),
 )
 
 urlpatterns = patterns('',

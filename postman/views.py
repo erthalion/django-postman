@@ -11,20 +11,25 @@ except ImportError:
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
-from django.utils.translation import ugettext as _
+from django.shortcuts import get_object_or_404, redirect
+from django.utils.decorators import method_decorator
 try:
     from django.utils.timezone import now  # Django 1.4 aware datetimes
 except ImportError:
     from datetime import datetime
     now = datetime.now
+from django.utils.translation import ugettext as _
+from django.views.decorators.csrf import csrf_protect
+from django.views.generic import FormView, TemplateView, View
 
-from postman.fields import autocompleter_app
-from postman.forms import WriteForm, AnonymousWriteForm, QuickReplyForm, FullReplyForm
-from postman.models import Message, get_order_by
-from postman.urls import OPTION_MESSAGES
-from postman.utils import format_subject, format_body
+from . import OPTION_MESSAGES
+from .fields import autocompleter_app
+from .forms import WriteForm, AnonymousWriteForm, QuickReplyForm, FullReplyForm
+from .models import Message, get_order_by
+from .utils import format_subject, format_body
+
+login_required_m = method_decorator(login_required)
+csrf_protect_m = method_decorator(csrf_protect)
 
 
 ##########
@@ -40,85 +45,102 @@ def _get_referer(request):
 ########
 # Views
 ########
-def _folder(request, folder_name, view_name, option, template_name):
+class FolderMixin(object):
     """Code common to the folders."""
-    kwargs = {}
-    if option:
-        kwargs.update(option=option)
-    order_by = get_order_by(request.GET)
-    if order_by:
-        kwargs.update(order_by=order_by)
-    msgs = getattr(Message.objects, folder_name)(request.user, **kwargs)
-    return render_to_response(template_name, {
-        'pm_messages': msgs,  # avoid 'messages', already used by contrib.messages
-        'by_conversation': option is None,
-        'by_message': option == OPTION_MESSAGES,
-        'by_conversation_url': reverse(view_name),
-        'by_message_url': reverse(view_name, args=[OPTION_MESSAGES]),
-        'current_url': request.get_full_path(),
-        'gets': request.GET,  # useful to postman_order_by template tag
-        }, context_instance=RequestContext(request))
+    http_method_names = ['get']
+
+    @login_required_m
+    def dispatch(self, *args, **kwargs):
+        return super(FolderMixin, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(FolderMixin, self).get_context_data(**kwargs)
+        params = {}
+        option = kwargs.get('option')
+        if option:
+            params['option'] = option
+        order_by = get_order_by(self.request.GET)
+        if order_by:
+            params['order_by'] = order_by
+        msgs = getattr(Message.objects, self.folder_name)(self.request.user, **params)
+        context.update({
+            'pm_messages': msgs,  # avoid 'messages', already used by contrib.messages
+            'by_conversation': option is None,
+            'by_message': option == OPTION_MESSAGES,
+            'by_conversation_url': reverse(self.view_name),
+            'by_message_url': reverse(self.view_name, args=[OPTION_MESSAGES]),
+            'current_url': self.request.get_full_path(),
+            'gets': self.request.GET,  # useful to postman_order_by template tag
+        })
+        return context
 
 
-@login_required
-def inbox(request, option=None, template_name='postman/inbox.html'):
+class InboxView(FolderMixin, TemplateView):
     """
     Display the list of received messages for the current user.
 
-    Optional arguments:
+    Optional URLconf name-based argument:
         ``option``: display option:
             OPTION_MESSAGES to view all messages
             default to None to view only the last message for each conversation
+    Optional URLconf configuration attribute:
         ``template_name``: the name of the template to use
 
     """
-    return _folder(request, 'inbox', 'postman_inbox', option, template_name)
+    # for FolderMixin:
+    folder_name = 'inbox'
+    view_name = 'postman_inbox'
+    # for TemplateView:
+    template_name = 'postman/inbox.html'
 
 
-@login_required
-def sent(request, option=None, template_name='postman/sent.html'):
+class SentView(FolderMixin, TemplateView):
     """
     Display the list of sent messages for the current user.
 
-    Optional arguments: refer to inbox()
+    Optional arguments and attributes: refer to InboxView.
 
     """
-    return _folder(request, 'sent', 'postman_sent', option, template_name)
+    # for FolderMixin:
+    folder_name = 'sent'
+    view_name = 'postman_sent'
+    # for TemplateView:
+    template_name = 'postman/sent.html'
 
 
-@login_required
-def archives(request, option=None, template_name='postman/archives.html'):
+class ArchivesView(FolderMixin, TemplateView):
     """
     Display the list of archived messages for the current user.
 
-    Optional arguments: refer to inbox()
+    Optional arguments and attributes: refer to InboxView.
 
     """
-    return _folder(request, 'archives', 'postman_archives', option, template_name)
+    # for FolderMixin:
+    folder_name = 'archives'
+    view_name = 'postman_archives'
+    # for TemplateView:
+    template_name = 'postman/archives.html'
 
 
-@login_required
-def trash(request, option=None, template_name='postman/trash.html'):
+class TrashView(FolderMixin, TemplateView):
     """
     Display the list of deleted messages for the current user.
 
-    Optional arguments: refer to inbox()
+    Optional arguments and attributes: refer to InboxView.
 
     """
-    return _folder(request, 'trash', 'postman_trash', option, template_name)
+    # for FolderMixin:
+    folder_name = 'trash'
+    view_name = 'postman_trash'
+    # for TemplateView:
+    template_name = 'postman/trash.html'
 
 
-def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm), autocomplete_channels=None,
-        template_name='postman/write.html', success_url=None,
-        user_filter=None, exchange_filter=None, max=None, auto_moderators=[]):
+class ComposeMixin(object):
     """
-    Display a form to compose a message.
+    Code common to the write and reply views.
 
-    Optional arguments:
-        ``recipients``: a colon-separated list of usernames
-        ``form_classes``: a 2-tuple of form classes
-        ``autocomplete_channels``: a channel name or a 2-tuple of names
-        ``template_name``: the name of the template to use
+    Optional attributes:
         ``success_url``: where to redirect to after a successful POST
         ``user_filter``: a filter for recipients
         ``exchange_filter``: a filter for exchanges between a sender and a recipient
@@ -126,193 +148,271 @@ def write(request, recipients=None, form_classes=(WriteForm, AnonymousWriteForm)
         ``auto_moderators``: a list of auto-moderation functions
 
     """
-    user = request.user
-    form_class = form_classes[0] if user.is_authenticated() else form_classes[1]
-    if isinstance(autocomplete_channels, tuple) and len(autocomplete_channels) == 2:
-        channel = autocomplete_channels[user.is_anonymous()]
-    else:
-        channel = autocomplete_channels
-    next_url = _get_referer(request)
-    if request.method == 'POST':
-        form = form_class(request.POST, sender=user, channel=channel,
-            user_filter=user_filter,
-            exchange_filter=exchange_filter,
-            max=max)
-        if form.is_valid():
-            is_successful = form.save(auto_moderators=auto_moderators)
-            if is_successful:
-                messages.success(request, _("Message successfully sent."), fail_silently=True)
-            else:
-                messages.warning(request, _("Message rejected for at least one recipient."), fail_silently=True)
-            return redirect(request.GET.get('next', success_url or next_url or 'postman_inbox'))
-    else:
-        initial = dict(request.GET.items())  # allow optional initializations by query string
-        if recipients:
-            # order_by() is not mandatory, but: a) it doesn't hurt; b) it eases the test suite
-            # and anyway the original ordering cannot be respected.
-            user_model = get_user_model()
-            usernames = list(user_model.objects.values_list(user_model.USERNAME_FIELD, flat=True).filter(
-                is_active=True,
-                **{'{0}__in'.format(user_model.USERNAME_FIELD): [r.strip() for r in recipients.split(':') if r and not r.isspace()]}
-            ).order_by(user_model.USERNAME_FIELD))
-            if usernames:
-                initial.update(recipients=', '.join(usernames))
-        form = form_class(initial=initial, channel=channel)
-    return render_to_response(template_name, {
-        'form': form,
-        'autocompleter_app': autocompleter_app,
-        'next_url': request.GET.get('next', next_url),
-        }, context_instance=RequestContext(request))
-if getattr(settings, 'POSTMAN_DISALLOW_ANONYMOUS', False):
-    write = login_required(write)
+    http_method_names = ['get', 'post']
+    success_url = None
+    user_filter = None
+    exchange_filter = None
+    max = None
+    auto_moderators = []
+
+    def get_form_kwargs(self):
+        kwargs = super(ComposeMixin, self).get_form_kwargs()
+        if self.request.method == 'POST':
+            kwargs.update({
+                'sender': self.request.user,
+                'user_filter': self.user_filter,
+                'exchange_filter': self.exchange_filter,
+                'max': self.max,
+            })        
+        return kwargs
+
+    def get_success_url(self):
+        return self.request.GET.get('next') or self.success_url or _get_referer(self.request) or 'postman_inbox'
+
+    def form_valid(self, form):
+        params = {'auto_moderators': self.auto_moderators}
+        if hasattr(self, 'parent'):  # only in the ReplyView case
+            params['parent'] = self.parent
+        is_successful = form.save(**params)
+        if is_successful:
+            messages.success(self.request, _("Message successfully sent."), fail_silently=True)
+        else:
+            messages.warning(self.request, _("Message rejected for at least one recipient."), fail_silently=True)
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super(ComposeMixin, self).get_context_data(**kwargs)
+        context.update({
+            'autocompleter_app': autocompleter_app,
+            'next_url': self.request.GET.get('next') or _get_referer(self.request),
+        })
+        return context
 
 
-@login_required
-def reply(request, message_id, form_class=FullReplyForm, formatters=(format_subject,format_body), autocomplete_channel=None,
-        template_name='postman/reply.html', success_url=None,
-        user_filter=None, exchange_filter=None, max=None, auto_moderators=[]):
+class WriteView(ComposeMixin, FormView):
+    """
+    Display a form to compose a message.
+
+    Optional URLconf name-based argument:
+        ``recipients``: a colon-separated list of usernames
+    Optional attributes:
+        ``form_classes``: a 2-tuple of form classes
+        ``autocomplete_channels``: a channel name or a 2-tuple of names
+        ``template_name``: the name of the template to use
+        + those of ComposeMixin
+
+    """
+    form_classes = (WriteForm, AnonymousWriteForm)
+    autocomplete_channels = None
+    template_name = 'postman/write.html'
+
+    @csrf_protect_m
+    def dispatch(self, *args, **kwargs):
+        if getattr(settings, 'POSTMAN_DISALLOW_ANONYMOUS', False):
+            return login_required(super(WriteView, self).dispatch)(*args, **kwargs)
+        return super(WriteView, self).dispatch(*args, **kwargs)
+
+    def get_form_class(self):
+        return self.form_classes[0] if self.request.user.is_authenticated() else self.form_classes[1]
+
+    def get_initial(self):
+        initial = super(WriteView, self).get_initial()
+        if self.request.method == 'GET':
+            initial.update(self.request.GET.items())  # allow optional initializations by query string
+            recipients = self.kwargs.get('recipients')
+            if recipients:
+                # order_by() is not mandatory, but: a) it doesn't hurt; b) it eases the test suite
+                # and anyway the original ordering cannot be respected.
+                user_model = get_user_model()
+                usernames = list(user_model.objects.values_list(user_model.USERNAME_FIELD, flat=True).filter(
+                    is_active=True,
+                    **{'{0}__in'.format(user_model.USERNAME_FIELD): [r.strip() for r in recipients.split(':') if r and not r.isspace()]}
+                ).order_by(user_model.USERNAME_FIELD))
+                if usernames:
+                    initial['recipients'] = ', '.join(usernames)
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super(WriteView, self).get_form_kwargs()
+        if isinstance(self.autocomplete_channels, tuple) and len(self.autocomplete_channels) == 2:
+            channel = self.autocomplete_channels[self.request.user.is_anonymous()]
+        else:
+            channel = self.autocomplete_channels
+        kwargs['channel'] = channel
+        return kwargs
+
+
+class ReplyView(ComposeMixin, FormView):
     """
     Display a form to compose a reply.
 
-    Optional arguments:
+    Optional attributes:
         ``form_class``: the form class to use
         ``formatters``: a 2-tuple of functions to prefill the subject and body fields
         ``autocomplete_channel``: a channel name
         ``template_name``: the name of the template to use
-        ``success_url``: where to redirect to after a successful POST
-        ``user_filter``: a filter for recipients
-        ``exchange_filter``: a filter for exchanges between a sender and a recipient
-        ``max``: an upper limit for the recipients number
-        ``auto_moderators``: a list of auto-moderation functions
+        + those of ComposeMixin
 
     """
-    user = request.user
-    perms = Message.objects.perms(user)
-    parent = get_object_or_404(Message, perms, pk=message_id)
-    initial = parent.quote(*formatters)
-    next_url = _get_referer(request)
-    if request.method == 'POST':
-        post = request.POST.copy()
-        if 'subject' not in post:  # case of the quick reply form
-            post['subject'] = initial['subject']
-        form = form_class(post, sender=user, recipient=parent.sender or parent.email,
-            channel=autocomplete_channel,
-            user_filter=user_filter,
-            exchange_filter=exchange_filter,
-            max=max)
-        if form.is_valid():
-            is_successful = form.save(parent=parent, auto_moderators=auto_moderators)
-            if is_successful:
-                messages.success(request, _("Message successfully sent."), fail_silently=True)
-            else:
-                messages.warning(request, _("Message rejected for at least one recipient."), fail_silently=True)
-            return redirect(request.GET.get('next', success_url or next_url or 'postman_inbox'))
-    else:
-        initial.update(request.GET.items())  # allow overwriting of the defaults by query string
-        form = form_class(initial=initial, channel=autocomplete_channel)
-    return render_to_response(template_name, {
-        'form': form,
-        'recipient': parent.obfuscated_sender,
-        'autocompleter_app': autocompleter_app,
-        'next_url': request.GET.get('next', next_url),
-        }, context_instance=RequestContext(request))
+    form_class = FullReplyForm
+    formatters = (format_subject, format_body)
+    autocomplete_channel = None
+    template_name = 'postman/reply.html'
+
+    @csrf_protect_m
+    @login_required_m
+    def dispatch(self, request, message_id, *args, **kwargs):
+        perms = Message.objects.perms(request.user)
+        self.parent = get_object_or_404(Message, perms, pk=message_id)
+        return super(ReplyView, self).dispatch(request,*args, **kwargs)
+
+    def get_initial(self):
+        self.initial = self.parent.quote(*self.formatters)  # will also be partially used in get_form_kwargs()
+        if self.request.method == 'GET':
+            self.initial.update(self.request.GET.items())  # allow overwriting of the defaults by query string
+        return self.initial
+
+    def get_form_kwargs(self):
+        kwargs = super(ReplyView, self).get_form_kwargs()
+        kwargs['channel'] = self.autocomplete_channel
+        if self.request.method == 'POST':
+            if 'subject' not in kwargs['data']:  # case of the quick reply form
+                post = kwargs['data'].copy()  # self.request.POST is immutable
+                post['subject'] = self.initial['subject']
+                kwargs['data'] = post
+            kwargs['recipient'] = self.parent.sender or self.parent.email
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(ReplyView, self).get_context_data(**kwargs)
+        context['recipient'] = self.parent.obfuscated_sender
+        return context
 
 
-def _view(request, filter, form_class=QuickReplyForm, formatters=(format_subject,format_body),
-        template_name='postman/view.html'):
+class DisplayMixin(object):
     """
     Code common to the by-message and by-conversation views.
 
-    Optional arguments:
+    Optional attributes:
         ``form_class``: the form class to use
         ``formatters``: a 2-tuple of functions to prefill the subject and body fields
         ``template_name``: the name of the template to use
 
     """
-    user = request.user
-    msgs = Message.objects.thread(user, filter)
-    if msgs:
-        Message.objects.set_read(user, filter)
+    http_method_names = ['get']
+    form_class = QuickReplyForm
+    formatters = (format_subject, format_body)
+    template_name = 'postman/view.html'
+
+    @login_required_m
+    def dispatch(self, *args, **kwargs):
+        return super(DisplayMixin, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        self.msgs = Message.objects.thread(user, self.filter)
+        if not self.msgs:
+            raise Http404
+        Message.objects.set_read(user, self.filter)
+        return super(DisplayMixin, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(DisplayMixin, self).get_context_data(**kwargs)
+        user = self.request.user
         # are all messages archived ?
-        for m in msgs:
+        for m in self.msgs:
             if not getattr(m, ('sender' if m.sender == user else 'recipient') + '_archived'):
                 archived = False
                 break
         else:
             archived = True
-        # look for the more recent received message (and non-deleted to comply with the future perms() control), if any
-        for m in reversed(msgs):
+        # look for the most recent received message (and non-deleted to comply with the future perms() control), if any
+        for m in reversed(self.msgs):
             if m.recipient == user and not m.recipient_deleted_at:
                 received = m
                 break
         else:
             received = None
-        return render_to_response(template_name, {
-            'pm_messages': msgs,
+        context.update({
+            'pm_messages': self.msgs,
             'archived': archived,
             'reply_to_pk': received.pk if received else None,
-            'form': form_class(initial=received.quote(*formatters)) if received else None,
-            'next_url': request.GET.get('next', reverse('postman_inbox')),
-            }, context_instance=RequestContext(request))
-    raise Http404
+            'form': self.form_class(initial=received.quote(*self.formatters)) if received else None,
+            'next_url': self.request.GET.get('next') or reverse('postman_inbox'),
+        })
+        return context
 
 
-@login_required
-def view(request, message_id, *args, **kwargs):
+class MessageView(DisplayMixin, TemplateView):
     """Display one specific message."""
-    return _view(request, Q(pk=message_id), *args, **kwargs)
+
+    def get(self, request, message_id, *args, **kwargs):
+        self.filter = Q(pk=message_id)
+        return super(MessageView, self).get(request, *args, **kwargs)
 
 
-@login_required
-def view_conversation(request, thread_id, *args, **kwargs):
+class ConversationView(DisplayMixin, TemplateView):
     """Display a conversation."""
-    return _view(request, Q(thread=thread_id), *args, **kwargs)
+
+    def get(self, request, thread_id, *args, **kwargs):
+        self.filter = Q(thread=thread_id)
+        return super(ConversationView, self).get(request, *args, **kwargs)
 
 
-def _update(request, field_bit, success_msg, field_value=None, success_url=None):
+class UpdateMessageMixin(object):
     """
     Code common to the archive/delete/undelete actions.
 
-    Arguments:
+    Attributes:
         ``field_bit``: a part of the name of the field to update
         ``success_msg``: the displayed text in case of success
-    Optional arguments:
+    Optional attributes:
         ``field_value``: the value to set in the field
         ``success_url``: where to redirect to after a successful POST
 
     """
-    if not request.method == 'POST':
-        raise Http404
-    next_url = _get_referer(request) or 'postman_inbox'
-    pks = request.POST.getlist('pks')
-    tpks = request.POST.getlist('tpks')
-    if pks or tpks:
-        user = request.user
-        filter = Q(pk__in=pks) | Q(thread__in=tpks)
-        recipient_rows = Message.objects.as_recipient(user, filter).update(**{'recipient_{0}'.format(field_bit): field_value})
-        sender_rows = Message.objects.as_sender(user, filter).update(**{'sender_{0}'.format(field_bit): field_value})
-        if not (recipient_rows or sender_rows):
-            raise Http404  # abnormal enough, like forged ids
-        messages.success(request, success_msg, fail_silently=True)
-        return redirect(request.GET.get('next', success_url or next_url))
-    else:
-        messages.warning(request, _("Select at least one object."), fail_silently=True)
-        return redirect(next_url)
+    http_method_names = ['post']
+    field_value = None
+    success_url = None
+
+    @csrf_protect_m
+    @login_required_m
+    def dispatch(self, *args, **kwargs):
+        return super(UpdateMessageMixin, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        next_url = _get_referer(request) or 'postman_inbox'
+        pks = request.POST.getlist('pks')
+        tpks = request.POST.getlist('tpks')
+        if pks or tpks:
+            user = request.user
+            filter = Q(pk__in=pks) | Q(thread__in=tpks)
+            recipient_rows = Message.objects.as_recipient(user, filter).update(**{'recipient_{0}'.format(self.field_bit): self.field_value})
+            sender_rows = Message.objects.as_sender(user, filter).update(**{'sender_{0}'.format(self.field_bit): self.field_value})
+            if not (recipient_rows or sender_rows):
+                raise Http404  # abnormal enough, like forged ids
+            messages.success(request, self.success_msg, fail_silently=True)
+            return redirect(request.GET.get('next') or self.success_url or next_url)
+        else:
+            messages.warning(request, _("Select at least one object."), fail_silently=True)
+            return redirect(next_url)
 
 
-@login_required
-def archive(request, *args, **kwargs):
+class ArchiveView(UpdateMessageMixin, View):
     """Mark messages/conversations as archived."""
-    return _update(request, 'archived', _("Messages or conversations successfully archived."), True, *args, **kwargs)
+    field_bit = 'archived'
+    success_msg = _("Messages or conversations successfully archived.")
+    field_value = True
 
 
-@login_required
-def delete(request, *args, **kwargs):
+class DeleteView(UpdateMessageMixin, View):
     """Mark messages/conversations as deleted."""
-    return _update(request, 'deleted_at', _("Messages or conversations successfully deleted."), now(), *args, **kwargs)
+    field_bit = 'deleted_at'
+    success_msg = _("Messages or conversations successfully deleted.")
+    field_value = now()
 
 
-@login_required
-def undelete(request, *args, **kwargs):
+class UndeleteView(UpdateMessageMixin, View):
     """Revert messages/conversations from marked as deleted."""
-    return _update(request, 'deleted_at', _("Messages or conversations successfully recovered."), *args, **kwargs)
+    field_bit = 'deleted_at'
+    success_msg = _("Messages or conversations successfully recovered.")
