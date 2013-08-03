@@ -36,6 +36,8 @@ class CompilerProxy(Proxy):
     # @Override
     def as_sql(self, *args, **kwargs):
         sql, params = self._target.as_sql(*args, **kwargs)
+        if not sql:  # is the case with a Paginator on an empty folder
+            return sql, params
         # mimics compiler.py/SQLCompiler/get_from_clause() and as_sql()
         qn = self.quote_name_unless_alias
         qn2 = self.connection.ops.quote_name

@@ -2,6 +2,10 @@
 Django Postman changelog
 ========================
 
+Version 3.0.1, August 2013
+--------------------------
+* Fix issue #32, an IndexError when a Paginator is used and the folder is empty.
+
 Version 3.0.0, July 2013
 ------------------------
 * !MAJOR! Redesign the DB queries for the 'by conversation' mode,
