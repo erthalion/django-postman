@@ -76,7 +76,7 @@ class GenericTest(TestCase):
     Usual generic tests.
     """
     def test_version(self):
-        self.assertEqual(sys.modules['postman'].__version__, "3.0.1")
+        self.assertEqual(sys.modules['postman'].__version__, "3.0.1.post1")
 
 
 class BaseTest(TestCase):

@@ -7,6 +7,7 @@ try:
 except ImportError:
     from postman.future_1_5 import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models.query import QuerySet
 try:
@@ -258,9 +259,8 @@ class Message(models.Model):
     def __unicode__(self):
         return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, Truncator(self.subject).words(5))
 
-    @models.permalink
     def get_absolute_url(self):
-        return ('postman_view', [str(self.pk)])
+        return reverse('postman_view', args=[self.pk])
 
     def is_pending(self):
         """Tell if the message is in the pending state."""
