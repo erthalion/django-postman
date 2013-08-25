@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
 "POT-Creation-Date: 2012-12-10 23:00+0100\n"
-"PO-Revision-Date: 2013-08-05 07:31+0000\n"
+"PO-Revision-Date: 2013-08-23 15:03+0000\n"
 "Last-Translator: sipp11 <sipp11@mycapsules.com>\n"
 "Language-Team: Thai (Thailand) (http://www.transifex.com/projects/p/django-postman/language/th_TH/)\n"
 "MIME-Version: 1.0\n"
@@ -24,11 +24,11 @@ msgstr "จะต้องมีทั้งชื่อผู้รับแล
 
 #: .\admin.py:32
 msgid "Visitor's email is in excess."
-msgstr ""
+msgstr "อีเมล์ของผู้เยี่ยมเยียนไม่ถูกต้อง"
 
 #: .\admin.py:37
 msgid "Visitor's email is missing."
-msgstr ""
+msgstr "ไม่มีอีเมล์ของผู้เยี่ยมเยียน"
 
 #: .\admin.py:43
 msgid "Reading date must be later to sending date."
@@ -60,7 +60,7 @@ msgstr "ไม่สามารถกำหนดวันที่ตอบร
 
 #: .\admin.py:69
 msgid "The message cannot be replied without being in a conversation."
-msgstr ""
+msgstr "ข้อความนี้ไม่สามารถตอบกลับได้อย่างอิสระ (จะต้องรวมเป็นบทสนทนา)"
 
 #: .\admin.py:92 .\admin.py:170 .\templates\postman\view.html.py:6
 msgid "Message"
@@ -76,19 +76,19 @@ msgstr "การตรวจสอบ"
 
 #: .\fields.py:27
 msgid "Some usernames are unknown or no more active: {users}."
-msgstr "ไม่มีผู้ใช้ชื่อ: {users} หรือบัญชีนั้น ๆ ไม่ได้ใช้ในขณะนี้"
+msgstr "ไม่มีผู้ใช้ชื่อ: {users} หรือบัญชีของผู้ใช้ข้างต้นไม่สามารถใช้งานได้ใช้ในขณะนี้"
 
 #: .\fields.py:28
 msgid ""
 "Ensure this value has at most {limit_value} distinct items (it has "
 "{show_value})."
-msgstr ""
+msgstr "โปรดตรวจสอบด้วยว่าจะต้องมีไม่เกิน {limit_value} ค่า ซึ่งตอนนี้มี {show_value}"
 
 #: .\fields.py:29
 msgid ""
 "Ensure this value has at least {limit_value} distinct items (it has "
 "{show_value})."
-msgstr ""
+msgstr "โปรดตรวจสอบด้วยว่าจะต้องมีไม่น้อยกว่า {limit_value} ค่า ซึ่งตอนนี้มี {show_value}"
 
 #: .\fields.py:30
 msgid "Some usernames are rejected: {users}."
@@ -133,7 +133,7 @@ msgstr "ผู้รับเพิ่มเติม"
 
 #: .\models.py:27
 msgid "Pending"
-msgstr ""
+msgstr "รอการพิจารณา"
 
 #: .\models.py:28
 msgid "Accepted"
@@ -161,7 +161,7 @@ msgstr "ผู้รับ"
 
 #: .\models.py:246
 msgid "visitor"
-msgstr ""
+msgstr "ผู้เยี่ยมเยียน"
 
 #: .\models.py:247
 msgid "parent message"
@@ -293,7 +293,7 @@ msgstr "คุณได้รับข้อความใหม่"
 
 #: .\management\__init__.py:17
 msgid "Reply Received"
-msgstr "ข้อความตอบกลับได้รับแล้ว"
+msgstr "ได้รับข้อความตอบกลับ"
 
 #: .\management\__init__.py:17
 msgid "You have received a reply"
@@ -402,7 +402,7 @@ msgstr "ส่ง"
 
 #: .\templates\postman\email_user.txt.py:1
 msgid "Dear user,"
-msgstr ""
+msgstr "สวัสดี, "
 
 #: .\templates\postman\email_user.txt.py:3
 #: .\templates\postman\email_visitor.txt.py:3
@@ -428,7 +428,7 @@ msgstr "เมื่อ %(date)s, คุณได้ส่งข้อควา�
 
 #: .\templates\postman\email_user.txt.py:10
 msgid "Your correspondent has given you an answer."
-msgstr ""
+msgstr "ผู้ที่คุณส่งข้อความถึงได้ตอบกลับข้อความของคุณ"
 
 #: .\templates\postman\email_user.txt.py:11
 #, python-format
@@ -465,19 +465,19 @@ msgstr "ข้อความ \"%(subject)s\" จากเว็บไซด์ 
 
 #: .\templates\postman\email_visitor.txt.py:1
 msgid "Dear visitor,"
-msgstr ""
+msgstr "สวัสดี, "
 
 #: .\templates\postman\email_visitor.txt.py:8
 msgid "As a reminder, please find below the content of your message."
-msgstr ""
+msgstr "เนื้อความของข้อความของคุณมีดังนี้"
 
 #: .\templates\postman\email_visitor.txt.py:11
 msgid "Please find below the answer from your correspondent."
-msgstr ""
+msgstr "ข้อความตอบกลับอยู่ข้างล่าง"
 
 #: .\templates\postman\email_visitor.txt.py:15
 msgid "For more comfort, we encourage you to open an account on the site."
-msgstr ""
+msgstr "แนะนำให้คุณสมัครสมาชิกกับเว็บไซด์ของเราเพื่อความสะดวกในการติดต่อ"
 
 #: .\templates\postman\inbox.html.py:3
 msgid "Received Messages"
@@ -520,4 +520,4 @@ msgstr "กลับ"
 
 #: .\templatetags\postman_tags.py:48
 msgid "<me>"
-msgstr ""
+msgstr "<ตัวเอง>"
