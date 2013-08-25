@@ -113,7 +113,7 @@ class BaseTest(TestCase):
         "Check that a date is now. Well... almost."
         delta = dt - now()
         seconds = delta.days * (24*60*60) + delta.seconds
-        self.assert_(-2 <= seconds <= 1)  # -1 is not enough for Mysql
+        self.assertTrue(-2 <= seconds <= 1)  # -1 is not enough for Mysql
 
     def check_status(self, m, status=STATUS_PENDING, is_new=True, is_replied=False, parent=None, thread=None,
         moderation_date=False, moderation_by=None, moderation_reason='',
@@ -135,21 +135,21 @@ class BaseTest(TestCase):
             if isinstance(sender_deleted_at, datetime):
                 self.assertEqual(m.sender_deleted_at, sender_deleted_at)
             else:
-                self.assertNotEquals(m.sender_deleted_at, None)
+                self.assertNotEqual(m.sender_deleted_at, None)
         else:
             self.assertEqual(m.sender_deleted_at, None)
         if recipient_deleted_at:
             if isinstance(recipient_deleted_at, datetime):
                 self.assertEqual(m.recipient_deleted_at, recipient_deleted_at)
             else:
-                self.assertNotEquals(m.recipient_deleted_at, None)
+                self.assertNotEqual(m.recipient_deleted_at, None)
         else:
             self.assertEqual(m.recipient_deleted_at, None)
         if moderation_date:
             if isinstance(moderation_date, datetime):
                 self.assertEqual(m.moderation_date, moderation_date)
             else:
-                self.assertNotEquals(m.moderation_date, None)
+                self.assertNotEqual(m.moderation_date, None)
         else:
             self.assertEqual(m.moderation_date, None)
         self.assertEqual(m.moderation_by, moderation_by)
@@ -206,7 +206,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertRedirects(response, "{0}?{1}={2}".format(settings.LOGIN_URL, REDIRECT_FIELD_NAME, url))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         url = reverse('postman_' + folder)
@@ -236,7 +236,7 @@ class ViewTest(BaseTest):
         m1.read_at, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
         m1.replied_at = m2.sent_at; m1.save()
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         for actions, args in [
             (('inbox', 'sent', 'archives', 'trash', 'write'), []),
             (('view', 'view_conversation'), [m1.pk]),
@@ -253,18 +253,18 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         from postman.forms import AnonymousWriteForm
-        self.assert_(isinstance(response.context['form'], AnonymousWriteForm))
+        self.assertTrue(isinstance(response.context['form'], AnonymousWriteForm))
         # anonymous is not allowed
         settings.POSTMAN_DISALLOW_ANONYMOUS = True
         self.reload_modules()
         response = self.client.get(url)
         self.assertRedirects(response, "{0}?{1}={2}".format(settings.LOGIN_URL, REDIRECT_FIELD_NAME, url))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         from postman.forms import WriteForm
-        self.assert_(isinstance(response.context['form'], WriteForm))
+        self.assertTrue(isinstance(response.context['form'], WriteForm))
 
     def test_write_recipient(self):
         "Test the passing of recipient names in URL."
@@ -291,7 +291,7 @@ class ViewTest(BaseTest):
         if hasattr(f, 'channel'):  # app may not be in INSTALLED_APPS
             self.assertEqual(f.channel, 'postman_single_as1-1')
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         f = response.context['form'].fields['recipients']
         if hasattr(f, 'channel'):
@@ -357,7 +357,7 @@ class ViewTest(BaseTest):
         self.check_write_post({'email': 'a@b.com'}, is_anonymous=True)
 
     def test_write_post_authenticated(self):
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         self.check_write_post()
 
     def test_write_post_multirecipient(self):
@@ -371,7 +371,7 @@ class ViewTest(BaseTest):
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertFormError(response, 'form', 'recipients', CommaSeparatedUserField.default_error_messages['max'].format(limit_value=1, show_value=2))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         del data['email']
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
@@ -393,7 +393,7 @@ class ViewTest(BaseTest):
         data = {
             'subject': 's', 'body': 'b',
             'recipients': '{0}, {1}'.format(self.user2.get_username(), self.user3.get_username())}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
 
         response = self.client.post(reverse('postman_write_with_user_filter_reason'), data, HTTP_REFERER=url)
         self.assertFormError(response, 'form', 'recipients', "Some usernames are rejected: bar (some reason).")
@@ -423,7 +423,7 @@ class ViewTest(BaseTest):
         "Test 'auto_moderators' parameter."
         url = reverse('postman_write')
         data = {'subject': 's', 'body': 'b', 'recipients': self.user2.get_username()}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.post(reverse('postman_write_moderate'), data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
         self.check_status(Message.objects.get(), status=STATUS_REJECTED, recipient_deleted_at=True,
@@ -438,11 +438,11 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertRedirects(response, "{0}?{1}={2}".format(settings.LOGIN_URL, REDIRECT_FIELD_NAME, url))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         from postman.forms import FullReplyForm
-        self.assert_(isinstance(response.context['form'], FullReplyForm))
+        self.assertTrue(isinstance(response.context['form'], FullReplyForm))
         self.assertContains(response, 'value="Re: s"')
         self.assertContains(response, '\n\nbar wrote:\n&gt; this is my body\n</textarea>')
         self.assertEqual(response.context['recipient'], 'bar')
@@ -452,7 +452,7 @@ class ViewTest(BaseTest):
         template = "postman/reply.html"
         pk = self.c21(body="this is my body").pk
         url = reverse('postman_reply_formatters', args=[pk])
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         self.assertContains(response, 'value="Re_ s"')
@@ -462,7 +462,7 @@ class ViewTest(BaseTest):
         "Test the 'autocomplete_channel' parameter."
         pk = self.c21().pk
         url = reverse('postman_reply_auto_complete', args=[pk])
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         f = response.context['form'].fields['recipients']
         if hasattr(f, 'channel'):
@@ -479,7 +479,7 @@ class ViewTest(BaseTest):
 
     def test_reply_id(self):
         "Test all sort of failures."
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         # invalid message id
         self.check_reply_404(1000)
         # existent message but you are the sender, not the recipient
@@ -493,7 +493,7 @@ class ViewTest(BaseTest):
 
     def test_reply_querystring(self):
         "Test the prefilling by query string."
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         self.check_init_by_query_string('reply', [self.c21().pk])
 
     def test_reply_post(self):
@@ -502,7 +502,7 @@ class ViewTest(BaseTest):
         url = reverse('postman_reply', args=[pk])
         url_with_success_url = reverse('postman_reply_with_success_url_to_sent', args=[pk])
         data = {'subject': 's', 'body': 'b'}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         # default redirect is to the requestor page
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
@@ -530,7 +530,7 @@ class ViewTest(BaseTest):
         pk = self.c21().pk
         url = reverse('postman_reply', args=[pk])
         data = {'subject': 's', 'body': 'b', 'recipients': self.user3.get_username()}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
         self.check_message(Message.objects.get(pk=pk+1))
@@ -553,7 +553,7 @@ class ViewTest(BaseTest):
         pk = self.c21().pk
         url = reverse('postman_reply', args=[pk])
         data = {'subject': 's', 'body': 'b', 'recipients': '{0}, {1}'.format(self.user2.get_username(), self.user3.get_username())}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
 
         response = self.client.post(reverse('postman_reply_with_user_filter_reason', args=[pk]), data, HTTP_REFERER=url)
         self.assertFormError(response, 'form', 'recipients', "Some usernames are rejected: bar (some reason).")
@@ -585,7 +585,7 @@ class ViewTest(BaseTest):
         pk = m.pk
         url = reverse('postman_reply', args=[pk])
         data = {'subject': 's', 'body': 'b'}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
 
         response = self.client.post(reverse('postman_reply_moderate', args=[pk]), data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
@@ -603,12 +603,12 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertRedirects(response, "{0}?{1}={2}".format(settings.LOGIN_URL, REDIRECT_FIELD_NAME, url))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         self.assertFalse(response.context['archived'])
-        self.assert_(response.context['reply_to_pk'] is None)
-        self.assert_(response.context['form'] is None)
+        self.assertTrue(response.context['reply_to_pk'] is None)
+        self.assertTrue(response.context['form'] is None)
         self.check_status(Message.objects.get(pk=pk1), status=STATUS_ACCEPTED)
 
         url = reverse('postman_view', args=[pk2])
@@ -616,7 +616,7 @@ class ViewTest(BaseTest):
         self.assertFalse(response.context['archived'])
         self.assertEqual(response.context['reply_to_pk'], pk2)
         from postman.forms import QuickReplyForm
-        self.assert_(isinstance(response.context['form'], QuickReplyForm))
+        self.assertTrue(isinstance(response.context['form'], QuickReplyForm))
         self.check_status(Message.objects.get(pk=pk2), status=STATUS_ACCEPTED, is_new=False)
 
     def test_view_formatters(self):
@@ -624,7 +624,7 @@ class ViewTest(BaseTest):
         template = "postman/view.html"
         pk = self.c21(body="this is my body").pk
         url = reverse('postman_view_formatters', args=[pk])
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         self.assertNotContains(response, 'value="Re_ s"')
@@ -635,7 +635,7 @@ class ViewTest(BaseTest):
 
     def test_view_id(self):
         "Test all sort of failures."
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         # invalid message id
         self.check_view_404(1000)
         # existent message but not yours
@@ -656,13 +656,13 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertRedirects(response, "{0}?{1}={2}".format(settings.LOGIN_URL, REDIRECT_FIELD_NAME, url))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertTemplateUsed(response, template)
         self.assertFalse(response.context['archived'])
         self.assertEqual(response.context['reply_to_pk'], m2.pk)
         from postman.forms import QuickReplyForm
-        self.assert_(isinstance(response.context['form'], QuickReplyForm))
+        self.assertTrue(isinstance(response.context['form'], QuickReplyForm))
         self.assertEqual(len(response.context['pm_messages']), 2)
         self.check_status(Message.objects.get(pk=m2.pk), status=STATUS_ACCEPTED, is_new=False, parent=m1, thread=m1)
 
@@ -671,7 +671,7 @@ class ViewTest(BaseTest):
 
     def test_view_conversation_id(self):
         "Test all sort of failures."
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         # invalid conversation id
         self.check_view_conversation_404(1000)
         # existent conversation but not yours
@@ -690,12 +690,12 @@ class ViewTest(BaseTest):
         url = reverse('postman_view_conversation', args=[m1.pk])
         self.check_status(Message.objects.get(pk=m1.pk), status=STATUS_ACCEPTED, is_new=False, thread=m1)
         # existent response but not yet visible to you
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.get(url)
         self.assertEqual(len(response.context['pm_messages']), 1)
         self.check_status(Message.objects.get(pk=m2.pk), parent=m1, thread=m1)
         # complete view on the other side
-        self.assert_(self.client.login(username='bar', password='pass'))
+        self.assertTrue(self.client.login(username='bar', password='pass'))
         response = self.client.get(url)
         self.assertEqual(len(response.context['pm_messages']), 2)
 
@@ -708,7 +708,7 @@ class ViewTest(BaseTest):
         response = self.client.post(url, data)
         self.assertRedirects(response, "{0}?{1}={2}".format(settings.LOGIN_URL, REDIRECT_FIELD_NAME, url))
         # authenticated
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         # default redirect is to the requestor page
         redirect_url = reverse('postman_sent')
         response = self.client.post(url, data, HTTP_REFERER=redirect_url)
@@ -736,7 +736,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url, data)
         self.assertEqual(response.status_code, 405)
         # not yours
-        self.assert_(self.client.login(username='baz', password='pass'))
+        self.assertTrue(self.client.login(username='baz', password='pass'))
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 404)
 
@@ -745,7 +745,7 @@ class ViewTest(BaseTest):
         url = reverse(view_name)
         pk = root_msg.pk
         data = {'tpks': str(pk)}
-        self.assert_(self.client.login(username='foo', password='pass'))
+        self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.post(url, data)
         self.assertRedirects(response, reverse('postman_inbox'))
         sender_kw = 'sender_{0}'.format(field_bit)
@@ -760,7 +760,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url, data)
         self.assertEqual(response.status_code, 405)
         # not yours
-        self.assert_(self.client.login(username='baz', password='pass'))
+        self.assertTrue(self.client.login(username='baz', password='pass'))
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 404)
 
@@ -1072,7 +1072,7 @@ class MessageTest(BaseTest):
         if s:
             self.assertEqual(m.obfuscated_sender, s.get_username())
         elif email:
-            self.assert_(obfuscated_email_re.match(m.obfuscated_sender))
+            self.assertTrue(obfuscated_email_re.match(m.obfuscated_sender))
         else:
             self.assertEqual(m.obfuscated_sender, '')
         self.assertEqual(m.admin_recipient(), r.get_username() if r else '<'+email+'>')
@@ -1080,7 +1080,7 @@ class MessageTest(BaseTest):
         if r:
             self.assertEqual(m.obfuscated_recipient, r.get_username())
         elif email:
-            self.assert_(obfuscated_email_re.match(m.obfuscated_recipient))
+            self.assertTrue(obfuscated_email_re.match(m.obfuscated_recipient))
         else:
             self.assertEqual(m.obfuscated_recipient, '')
 
@@ -1489,11 +1489,11 @@ class PendingMessageTest(BaseTest):
     """
     def test(self):
         m = PendingMessage()
-        self.assert_(m.is_pending())
+        self.assertTrue(m.is_pending())
         m.set_accepted()
-        self.assert_(m.is_accepted())
+        self.assertTrue(m.is_accepted())
         m.set_rejected()
-        self.assert_(m.is_rejected())
+        self.assertTrue(m.is_rejected())
 
 
 class FiltersTest(BaseTest):
