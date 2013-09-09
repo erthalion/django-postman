@@ -278,15 +278,15 @@ msgstr "Seleccione al menos un objeto."
 
 #: .\views.py:306
 msgid "Messages or conversations successfully archived."
-msgstr "Mensajes o conversaciones archivado con éxito."
+msgstr "Mensajes o conversaciones archivados con éxito."
 
 #: .\views.py:312
 msgid "Messages or conversations successfully deleted."
-msgstr "Mensajes o conversaciones eliminado con éxito."
+msgstr "Mensajes o conversaciones eliminados con éxito."
 
 #: .\views.py:318
 msgid "Messages or conversations successfully recovered."
-msgstr "Mensajes o conversaciones recuperado con éxito."
+msgstr "Mensajes o conversaciones recuperados con éxito."
 
 #: .\management\__init__.py:15
 msgid "Message Rejected"
