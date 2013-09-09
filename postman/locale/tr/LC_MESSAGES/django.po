@@ -3,50 +3,51 @@
 # This file is distributed under the same license as the django-postman package.
 # 
 # Translators:
-# Tolga GÜNDOĞAN <tgundogan@gmail.com>, 2012.
-# Ahmet Emre Aladağ <emre@woramo.com>, 2012.
-#   <raiden@ceviz.net>, 2012.
+# Tolga GÜNDOĞAN <tgundogan@gmail.com>, 2012
+# Ahmet Emre Aladağ <emre@woramo.com>, 2012
+# ysfkc <raiden@ceviz.net>, 2012
+# Gökmen Görgen <gokmen@alageek.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
-"POT-Creation-Date: 2012-12-10 23:17+0100\n"
-"PO-Revision-Date: 2012-12-04 12:41+0000\n"
-"Last-Translator: ysfkc <raiden@ceviz.net>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2012-12-10 23:00+0100\n"
+"PO-Revision-Date: 2013-08-27 10:21+0000\n"
+"Last-Translator: Gökmen Görgen <gokmen@alageek.com>\n"
+"Language-Team: Turkish (http://www.transifex.com/projects/p/django-postman/language/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: tr\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: .\admin.py:25
 msgid "Sender and Recipient cannot be both undefined."
-msgstr "Gönderen ve Alıcı beraber belirlenmemiş olamaz."
+msgstr "Gönderen ve alıcının tanımlanması zorunludur."
 
 #: .\admin.py:32
 msgid "Visitor's email is in excess."
-msgstr "Ziyaretçinin e-postası fazla."
+msgstr "Alıcı zaten seçilmiş, ayrıca eposta adresi yazmayınız."
 
 #: .\admin.py:37
 msgid "Visitor's email is missing."
-msgstr "Ziyaretçini e-postası kayıp."
+msgstr "Alıcının eposta adresi belirtilmemiş."
 
 #: .\admin.py:43
 msgid "Reading date must be later to sending date."
-msgstr "Okuma tarihi gönderme tarihinden geç olmalı."
+msgstr "Okuma tarihi gönderme tarihinden daha sonra olmalı."
 
 #: .\admin.py:48
 msgid "Deletion date by sender must be later to sending date."
-msgstr "Gönderen tarafından silme tarihi gönderme tarihinden geç olmalı."
+msgstr "Gönderenin silme tarihi, gönderme tarihinden daha sonra olmalı."
 
 #: .\admin.py:53
 msgid "Deletion date by recipient must be later to sending date."
-msgstr "Alıcı tarafından silme tarihi gönderme tarihinden geç olmalı."
+msgstr "Alıcının silme tarihi, gönderme tarihinden daha sonra olmalı."
 
 #: .\admin.py:61
 msgid "Response date must be later to sending date."
-msgstr "Cevap tarihi, gönderi taihinden geç olmalı."
+msgstr "Cevap tarihi, gönderme tarihinden daha sonra olmalı."
 
 #: .\admin.py:63
 msgid "The message cannot be replied without having been read."
@@ -54,7 +55,7 @@ msgstr "Mesaj okunmuş olmadan cevaplanamaz."
 
 #: .\admin.py:65
 msgid "Response date must be later to reading date."
-msgstr "Cevap tarihi, gönderi taihinden geç olmalı."
+msgstr "Cevap tarihi, okuma tarihinden daha sonra olmalı."
 
 #: .\admin.py:67
 msgid "Response date cannot be set without at least one reply."
@@ -62,7 +63,7 @@ msgstr "En az bir cevap olmadan, cevap tarihi belirlenemez."
 
 #: .\admin.py:69
 msgid "The message cannot be replied without being in a conversation."
-msgstr ""
+msgstr "Bir yazışma olmadan mesaj yanıtlanamaz."
 
 #: .\admin.py:92 .\admin.py:170 .\templates\postman\view.html.py:6
 msgid "Message"
@@ -74,29 +75,27 @@ msgstr "Tarihler"
 
 #: .\admin.py:102 .\admin.py:174
 msgid "Moderation"
-msgstr "Moderasyon"
+msgstr "Yönetim"
 
 #: .\fields.py:27
 msgid "Some usernames are unknown or no more active: {users}."
-msgstr "Bazı kullanıcı adları bilinmiyor yada artık aktif değiller: {users}."
+msgstr "Bazı kullanıcı isimleri bilinmiyor veya artık aktif değiller: {users}."
 
 #: .\fields.py:28
 msgid ""
 "Ensure this value has at most {limit_value} distinct items (it has "
 "{show_value})."
-msgstr ""
-"Bu değerin en çok {limit_value} farklı öğesi ({show_value} si var) olduğuna "
-"emin olun."
+msgstr "Bu değerin en çok {limit_value} farklı öğesi ({show_value} si var) olduğuna emin olun."
 
 #: .\fields.py:29
 msgid ""
 "Ensure this value has at least {limit_value} distinct items (it has "
 "{show_value})."
-msgstr ""
+msgstr "Bu değerin en az {limit_value} farklı öğesi ({show_value} si var) olduğuna emin olun."
 
 #: .\fields.py:30
 msgid "Some usernames are rejected: {users}."
-msgstr "Bazı kullanıcı adları reddedildi: {users}."
+msgstr "Bazı kullanıcı isimleri kabul edilmedi: {users}."
 
 #: .\fields.py:31 .\forms.py:71
 msgid "{username}"
@@ -108,7 +107,7 @@ msgstr "{username} ({reason})"
 
 #: .\forms.py:70
 msgid "Writing to some users is not possible: {users}."
-msgstr "Bazı kullanıcılıara yazmak mümkün değil: {users}."
+msgstr "Bazı kullanıcılara mesaj gönderilemiyor: {users}."
 
 #: .\forms.py:155 .\forms.py:168
 msgid "Recipients"
@@ -125,7 +124,7 @@ msgstr "Eposta"
 
 #: .\forms.py:184
 msgid "Undefined recipient."
-msgstr "Belirsiz alıcı."
+msgstr "Tanımsız alıcı."
 
 #: .\forms.py:205
 msgid "Additional recipients"
@@ -137,7 +136,7 @@ msgstr "Ek alıcı"
 
 #: .\models.py:27
 msgid "Pending"
-msgstr "Bekleyenler"
+msgstr "Beklemede"
 
 #: .\models.py:28
 msgid "Accepted"
@@ -153,7 +152,7 @@ msgstr "konu"
 
 #: .\models.py:243
 msgid "body"
-msgstr "gövde"
+msgstr "mesaj"
 
 #: .\models.py:244 .\models.py:326
 msgid "sender"
@@ -165,7 +164,7 @@ msgstr "alıcı"
 
 #: .\models.py:246
 msgid "visitor"
-msgstr "ziyaretçi"
+msgstr "alıcı epostası"
 
 #: .\models.py:247
 msgid "parent message"
@@ -177,19 +176,19 @@ msgstr "kök mesaj"
 
 #: .\models.py:249
 msgid "sent at"
-msgstr "de gönderildi"
+msgstr "gönderim tarihi"
 
 #: .\models.py:250
 msgid "read at"
-msgstr "de okundu"
+msgstr "okuma tarihi"
 
 #: .\models.py:251
 msgid "replied at"
-msgstr "de cevaplandı"
+msgstr "cevaplama tarihi"
 
 #: .\models.py:252
 msgid "archived by sender"
-msgstr "kullanıcı tarafından arşivlendi"
+msgstr "gönderen tarafından arşivlendi"
 
 #: .\models.py:253
 msgid "archived by recipient"
@@ -197,11 +196,11 @@ msgstr "alıcı tarafından arşivlendi"
 
 #: .\models.py:254
 msgid "deleted by sender at"
-msgstr "de gönderen tarafından silindi"
+msgstr "gönderen tarafından silinme tarihi"
 
 #: .\models.py:255
 msgid "deleted by recipient at"
-msgstr "de alıcı tarafından silindi"
+msgstr "alıcı tarafından silinme tarihi"
 
 #: .\models.py:257
 msgid "status"
@@ -209,15 +208,15 @@ msgstr "durum"
 
 #: .\models.py:259
 msgid "moderator"
-msgstr "moderatör"
+msgstr "denetleyici"
 
 #: .\models.py:260
 msgid "moderated at"
-msgstr ""
+msgstr "denetim tarihi"
 
 #: .\models.py:261
 msgid "rejection reason"
-msgstr "reddedilme sebebi"
+msgstr "reddedilme nedeni"
 
 #: .\models.py:266
 msgid "message"
@@ -229,7 +228,7 @@ msgstr "mesajlar"
 
 #: .\models.py:378
 msgid "Undefined sender."
-msgstr "Belirsiz gönderen."
+msgstr "Tanımsız gönderen."
 
 #: .\models.py:523
 msgid "pending message"
@@ -265,23 +264,23 @@ msgstr "Mesaj başarıyla gönderildi."
 
 #: .\views.py:146 .\views.py:208
 msgid "Message rejected for at least one recipient."
-msgstr "Mesaj en az bir alıcı için reddedildi."
+msgstr "Mesaj bazı alıcılara gönderilemedi."
 
 #: .\views.py:299
 msgid "Select at least one object."
-msgstr "En az bir öğe seçin."
+msgstr "En az birini seçiniz."
 
 #: .\views.py:306
 msgid "Messages or conversations successfully archived."
-msgstr "Mesajlar arşivlendi."
+msgstr "Mesajlar veya yazışmalar arşivlendi."
 
 #: .\views.py:312
 msgid "Messages or conversations successfully deleted."
-msgstr "Masajlar başarıyla silindi."
+msgstr "Mesajlar veya yazışmalar başarıyla silindi."
 
 #: .\views.py:318
 msgid "Messages or conversations successfully recovered."
-msgstr "Mesajlar başarıyla kurtarıldı."
+msgstr "Mesajlar veya yazışmalar başarıyla kurtarıldı."
 
 #: .\management\__init__.py:15
 msgid "Message Rejected"
@@ -305,12 +304,13 @@ msgstr "Cevap Alındı"
 
 #: .\management\__init__.py:17
 msgid "You have received a reply"
-msgstr "Bir mesaj aldınız"
+msgstr "Bir cevap aldınız"
 
 #: .\templates\admin\postman\pendingmessage\change_form.html.py:17
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
-msgstr[0] ""
+msgstr[0] "Lütfen aşağıdaki hatayı düzeltiniz."
+msgstr[1] "Lütfen aşağıdaki hataları düzeltiniz."
 
 #: .\templates\admin\postman\pendingmessage\submit_line.html.py:6
 msgid "Accept"
@@ -328,7 +328,7 @@ msgstr "Arşivlenmiş Mesajlar"
 msgid ""
 "Messages in this folder will never be removed. You can use this folder for "
 "long term storage."
-msgstr ""
+msgstr "Bu dizindeki mesajlar asla silinmemiş olacak. Uzun süre saklamak istediğiniz mesajlarınız için bu dizini kullanabilirsiniz."
 
 #: .\templates\postman\base.html.py:4
 msgid "Messaging"
@@ -344,7 +344,7 @@ msgstr "Gönderilen Mesajlar"
 
 #: .\templates\postman\base.html.py:15 .\templates\postman\write.html.py:3
 msgid "Write"
-msgstr "Yaz"
+msgstr "Yeni mesaj yaz"
 
 #: .\templates\postman\base.html.py:16
 msgid "Archives"
@@ -360,7 +360,7 @@ msgstr "Üzgünüz, bu sayfa numarası geçersiz."
 
 #: .\templates\postman\base_folder.html.py:20
 msgid "by conversation"
-msgstr "sohbete göre"
+msgstr "yazışmaya göre"
 
 #: .\templates\postman\base_folder.html.py:21
 msgid "by message"
@@ -374,7 +374,7 @@ msgstr "Sil"
 #: .\templates\postman\base_folder.html.py:26
 #: .\templates\postman\view.html.py:24
 msgid "Archive"
-msgstr "Arşiv"
+msgstr "Arşivle"
 
 #: .\templates\postman\base_folder.html.py:27
 msgid "Undelete"
@@ -386,7 +386,7 @@ msgstr "Eylem"
 
 #: .\templates\postman\base_folder.html.py:33
 msgid "Sender"
-msgstr "Gönderici"
+msgstr "Gönderen"
 
 #: .\templates\postman\base_folder.html.py:35
 msgid "Subject"
@@ -398,7 +398,7 @@ msgstr "Tarih"
 
 #: .\templates\postman\base_folder.html.py:51
 msgid "g:i A,M j,n/j/y"
-msgstr ""
+msgstr "g:i A,M j,n/j/y"
 
 #: .\templates\postman\base_folder.html.py:58
 msgid "No messages."
@@ -416,33 +416,32 @@ msgstr "Sayın kullanıcı,"
 #: .\templates\postman\email_visitor.txt.py:3
 #, python-format
 msgid "On %(date)s, you asked to send a message to the user '%(recipient)s'."
-msgstr ""
-"%(date)s tarihinde, '%(recipient)s' kullanıcısına mesaj göndermek istediniz."
+msgstr "%(date)s tarihinde, '%(recipient)s' kullanıcısına mesaj göndermek istediniz."
 
 #: .\templates\postman\email_user.txt.py:5
 #: .\templates\postman\email_visitor.txt.py:5
 msgid "Your message has been rejected by the moderator"
-msgstr "Mesajınız moderatör tarafından reddedilmiştir."
+msgstr "Mesajınız yönetim tarafından reddedilmiştir"
 
 #: .\templates\postman\email_user.txt.py:5
 #: .\templates\postman\email_visitor.txt.py:5
 msgid ", for the following reason:"
-msgstr ", sebebi:"
+msgstr ", nedeni:"
 
 #: .\templates\postman\email_user.txt.py:9
 #: .\templates\postman\email_visitor.txt.py:10
 #, python-format
 msgid "On %(date)s, you sent a message to the user '%(sender)s'."
-msgstr ""
+msgstr "%(date)s tarihinde, '%(sender)s' kullanıcısına mesaj gönderdiniz."
 
 #: .\templates\postman\email_user.txt.py:10
 msgid "Your correspondent has given you an answer."
-msgstr ""
+msgstr "Yazıştığınız kişi size cevap yazdı."
 
 #: .\templates\postman\email_user.txt.py:11
 #, python-format
 msgid "You have received a copy of a response from the user '%(sender)s'."
-msgstr ""
+msgstr "'%(sender)s' kullanıcısından, yanıtın bir kopyasını aldınız."
 
 #: .\templates\postman\email_user.txt.py:13
 #, python-format
@@ -464,29 +463,29 @@ msgstr "Site yöneticisi"
 msgid ""
 "Note: This message is issued by an automated system.\n"
 "Do not reply, this would not be taken into account."
-msgstr ""
+msgstr "Not: Bu mesaj otomatik sistem tarafından yazılmıştır.\nLütfen cevap yazmayınız, sistem cevapları almamaktadır."
 
 #: .\templates\postman\email_user_subject.txt.py:1
 #: .\templates\postman\email_visitor_subject.txt.py:1
 #, python-format
 msgid "Message \"%(subject)s\" on the site %(sitename)s"
-msgstr ""
+msgstr "%(sitename)s sitesinden mesaj aldınız: \"%(subject)s\""
 
 #: .\templates\postman\email_visitor.txt.py:1
 msgid "Dear visitor,"
-msgstr "Sevgili ziyaretçi,"
+msgstr "Sayın ziyaretçi,"
 
 #: .\templates\postman\email_visitor.txt.py:8
 msgid "As a reminder, please find below the content of your message."
-msgstr ""
+msgstr "Bir hatırlatma olarak, aşağıda mesajınızı görebilirsiniz."
 
 #: .\templates\postman\email_visitor.txt.py:11
 msgid "Please find below the answer from your correspondent."
-msgstr ""
+msgstr "Aşağıda yazıştığınız kişiden gelen mesajı okuyabilirsiniz."
 
 #: .\templates\postman\email_visitor.txt.py:15
 msgid "For more comfort, we encourage you to open an account on the site."
-msgstr ""
+msgstr "Daha rahat yazışmak için, sitemizde hesap açmanızı öneririz."
 
 #: .\templates\postman\inbox.html.py:3
 msgid "Received Messages"
@@ -513,11 +512,11 @@ msgstr "Silinen Mesajlar"
 msgid ""
 "Messages in this folder can be removed from time to time. For long term "
 "storage, use instead the archive folder."
-msgstr ""
+msgstr "Bu dizindeki mesajlar zaman zaman silinmektedir. Mesajlarınızı saklamak için, arşiv dizinini kullanınız."
 
 #: .\templates\postman\view.html.py:6
 msgid "Conversation"
-msgstr "Sohbet"
+msgstr "Yazışma"
 
 #: .\templates\postman\view.html.py:14
 msgid ":"
