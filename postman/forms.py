@@ -48,6 +48,7 @@ class BaseWriteForm(forms.ModelForm):
         user_filter = kwargs.pop('user_filter', None)
         max = kwargs.pop('max', None)
         channel = kwargs.pop('channel', None)
+        self.site = kwargs.pop('site', None)
         super(BaseWriteForm, self).__init__(*args, **kwargs)
 
         self.instance.sender = sender if (sender and sender.is_authenticated()) else None
@@ -141,7 +142,7 @@ class BaseWriteForm(forms.ModelForm):
             if self.instance.is_rejected():
                 is_successful = False
             self.instance.update_parent(initial_status)
-            self.instance.notify_users(initial_status)
+            self.instance.notify_users(initial_status, self.site)
             # some resets for next reuse
             if not isinstance(r, get_user_model()):
                 self.instance.email = ''

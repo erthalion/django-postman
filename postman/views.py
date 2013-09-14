@@ -8,6 +8,7 @@ try:
     from django.contrib.auth import get_user_model  # Django 1.5
 except ImportError:
     from postman.future_1_5 import get_user_model
+from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404
@@ -163,6 +164,7 @@ class ComposeMixin(object):
                 'user_filter': self.user_filter,
                 'exchange_filter': self.exchange_filter,
                 'max': self.max,
+                'site': get_current_site(self.request),
             })        
         return kwargs
 

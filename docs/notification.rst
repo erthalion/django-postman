@@ -17,7 +17,8 @@ An email is sent, using these templates:
 
 The available context variables are:
 
-* ``site``: the Site instance
+* ``site``: the *Site* instance if the "sites" framework is installed, otherwise a *RequestSite* instance
+  with a fallback to *None* in the case of the API
 * ``object``: the Message instance
 * ``action``: 'rejection' or 'acceptance'
 

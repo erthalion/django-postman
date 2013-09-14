@@ -7,7 +7,7 @@ Test suite.
     base.html
     404.html
 
-To have a fast test session, you can set a minimal configuration as:
+To have a fast test session, set a minimal configuration as:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -22,11 +22,11 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    # 'django.contrib.sites',  # is optional
     'django.contrib.admin',
-    # 'pagination', # or use the mock
-    # 'ajax_select', # is an option
-    # 'notification', # is an option
+    # 'pagination',  # or use the mock
+    # 'ajax_select',  # is an option
+    # 'notification',  # is an option
     'postman',
 )
 
@@ -44,6 +44,7 @@ try:
 except ImportError:
     from postman.future_1_5 import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.sites.models import Site
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, clear_url_caches, get_resolver, get_urlconf
@@ -428,6 +429,23 @@ class ViewTest(BaseTest):
         self.assertRedirects(response, url)
         self.check_status(Message.objects.get(), status=STATUS_REJECTED, recipient_deleted_at=True,
             moderation_date=True, moderation_reason="some reason")
+
+    def test_write_notification(self):
+        "Test the fallback for the site name in the generation of a notification, when the django.contrib.sites app is not installed."
+        settings.POSTMAN_AUTO_MODERATE_AS = True  # will generate an acceptance notification
+        url = reverse('postman_write')
+        data = {'subject': 's', 'body': 'b', 'recipients': self.user2.get_username()}
+        self.assertTrue(self.client.login(username='foo', password='pass'))
+        response = self.client.post(url, data, HTTP_REFERER=url)
+        self.assertRedirects(response, url)
+        self.check_status(Message.objects.get(), status=STATUS_ACCEPTED, moderation_date=True)
+        self.assertEqual(len(mail.outbox), 1)
+        # can't use get_current_site(response.request) because response.request is not an HttpRequest and doesn't have a get_host attribute
+        if Site._meta.installed:
+            sitename = Site.objects.get_current().name
+        else:
+            sitename = "testserver"  # the SERVER_NAME environment variable is not accessible here
+        self.assertTrue(sitename in mail.outbox[0].subject)
 
     def test_reply_authentication(self):
         "Test permission and what template & form are used."
@@ -1303,7 +1321,7 @@ class MessageTest(BaseTest):
 
     def check_notification(self, m, mail_number, email=None, is_auto_moderated=True, notice_label=None):
         "Check number of mails, recipient, and notice creation."
-        m.notify_users(STATUS_PENDING, is_auto_moderated)
+        m.notify_users(STATUS_PENDING, Site.objects.get_current() if Site._meta.installed else None, is_auto_moderated)
         self.assertEqual(len(mail.outbox), mail_number)
         if mail_number:
             self.assertEqual(mail.outbox[0].to, [email])

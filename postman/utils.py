@@ -4,7 +4,6 @@ import sys
 from textwrap import TextWrapper
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -65,9 +64,8 @@ def format_subject(subject):
     return subject if re.match(pattern, subject, re.IGNORECASE) else str.format(subject=subject)
 
 
-def email(subject_template, message_template, recipient_list, object, action=None):
+def email(subject_template, message_template, recipient_list, object, action, site):
     """Compose and send an email."""
-    site = Site.objects.get_current()
     ctx_dict = {'site': site, 'object': object, 'action': action}
     subject = render_to_string(subject_template, ctx_dict)
     # Email subject *must not* contain newlines
@@ -77,12 +75,12 @@ def email(subject_template, message_template, recipient_list, object, action=Non
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
 
 
-def email_visitor(object, action):
+def email_visitor(object, action, site):
     """Email a visitor."""
-    email('postman/email_visitor_subject.txt', 'postman/email_visitor.txt', [object.email], object, action)
+    email('postman/email_visitor_subject.txt', 'postman/email_visitor.txt', [object.email], object, action, site)
 
 
-def notify_user(object, action):
+def notify_user(object, action, site):
     """Notify a user."""
     if action == 'rejection':
         user = object.sender
@@ -98,4 +96,4 @@ def notify_user(object, action):
         notification.send(users=[user], label=label, extra_context={'pm_message': object, 'pm_action': action})
     else:
         if not DISABLE_USER_EMAILING and user.email and user.is_active:
-            email('postman/email_user_subject.txt', 'postman/email_user.txt', [user.email], object, action)
+            email('postman/email_user_subject.txt', 'postman/email_user.txt', [user.email], object, action, site)

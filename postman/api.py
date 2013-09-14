@@ -18,6 +18,7 @@ for e in events:
 """
 from __future__ import unicode_literals
 
+from django.contrib.sites.models import Site
 try:
     from django.utils.timezone import now  # Django 1.4 aware datetimes
 except ImportError:
@@ -25,6 +26,12 @@ except ImportError:
     now = datetime.now
 
 from postman.models import Message, STATUS_PENDING, STATUS_ACCEPTED
+
+
+def _get_site():
+    # do not require the sites framework to be installed ; and no request object is available here
+    return Site.objects.get_current() if Site._meta.installed else None
+
 
 def pm_broadcast(sender, recipients, subject, body='', skip_notification=False):
     """
@@ -47,7 +54,8 @@ def pm_broadcast(sender, recipients, subject, body='', skip_notification=False):
         message.pk = None
         message.save()
         if not skip_notification:
-            message.notify_users(STATUS_PENDING)
+            message.notify_users(STATUS_PENDING, _get_site())
+
 
 def pm_write(sender, recipient, subject, body='', skip_notification=False,
         auto_archive=False, auto_delete=False, auto_moderators=None):
@@ -77,4 +85,4 @@ def pm_write(sender, recipient, subject, body='', skip_notification=False,
         message.sender_deleted_at = now()
     message.save()
     if not skip_notification:
-        message.notify_users(initial_status)
+        message.notify_users(initial_status, _get_site())
