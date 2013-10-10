@@ -238,8 +238,8 @@ class Message(models.Model):
     sent_at = models.DateTimeField(_("sent at"), default=now)
     read_at = models.DateTimeField(_("read at"), null=True, blank=True)
     replied_at = models.DateTimeField(_("replied at"), null=True, blank=True)
-    sender_archived = models.BooleanField(_("archived by sender"))
-    recipient_archived = models.BooleanField(_("archived by recipient"))
+    sender_archived = models.BooleanField(_("archived by sender"), default=False)
+    recipient_archived = models.BooleanField(_("archived by recipient"), default=False)
     sender_deleted_at = models.DateTimeField(_("deleted by sender at"), null=True, blank=True)
     recipient_deleted_at = models.DateTimeField(_("deleted by recipient at"), null=True, blank=True)
     # moderation fields
