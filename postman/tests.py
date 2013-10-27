@@ -77,14 +77,14 @@ class GenericTest(TestCase):
     Usual generic tests.
     """
     def test_version(self):
-        self.assertEqual(sys.modules['postman'].__version__, "3.0.1.post1")
+        self.assertEqual(sys.modules['postman'].__version__, "3.0.2")
 
 
 class BaseTest(TestCase):
     """
     Common configuration and helper functions for all tests.
     """
-    urls = 'postman.test_urls'
+    urls = 'postman.urls_for_tests'
 
     def setUp(self):
         deactivate()  # necessary for 1.4 to consider a new settings.LANGUAGE_CODE; 1.3 is fine with or without
@@ -322,6 +322,14 @@ class ViewTest(BaseTest):
             self.check_status(m, sender_deleted_at=True)
         self.assertEqual(len(mail.outbox), 0)
 
+    def check_contrib_messages(self, response, text):
+        if 'messages' in response.context:  # contrib\messages\context_processors.py may be not there
+            messages = response.context['messages']
+            if messages != []:  # contrib\messages\middleware.py may be not there
+                self.assertEqual(len(messages), 1)
+                for message in messages:  # can only be iterated
+                    self.assertEqual(str(message), text)
+
     def check_write_post(self, extra={}, is_anonymous=False):
         "Check message generation, redirection, and mandatory fields."
         url = reverse('postman_write')
@@ -329,8 +337,9 @@ class ViewTest(BaseTest):
         data = {'recipients': self.user2.get_username(), 'subject': 's', 'body': 'b'}
         data.update(extra)
         # default redirect is to the requestor page
-        response = self.client.post(url, data, HTTP_REFERER=url)
+        response = self.client.post(url, data, HTTP_REFERER=url, follow=True)
         self.assertRedirects(response, url)
+        self.check_contrib_messages(response, 'Message successfully sent.')  # no such check for the following posts, one is enough
         m = Message.objects.get()
         pk = m.pk
         self.check_message(m, is_anonymous)
@@ -425,8 +434,9 @@ class ViewTest(BaseTest):
         url = reverse('postman_write')
         data = {'subject': 's', 'body': 'b', 'recipients': self.user2.get_username()}
         self.assertTrue(self.client.login(username='foo', password='pass'))
-        response = self.client.post(reverse('postman_write_moderate'), data, HTTP_REFERER=url)
+        response = self.client.post(reverse('postman_write_moderate'), data, HTTP_REFERER=url, follow=True)
         self.assertRedirects(response, url)
+        self.check_contrib_messages(response, 'Message rejected for at least one recipient.')
         self.check_status(Message.objects.get(), status=STATUS_REJECTED, recipient_deleted_at=True,
             moderation_date=True, moderation_reason="some reason")
 
@@ -524,6 +534,7 @@ class ViewTest(BaseTest):
         # default redirect is to the requestor page
         response = self.client.post(url, data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
+        # the check_contrib_messages() in test_write_post() is enough
         self.check_message(Message.objects.get(pk=pk+1))
         # fallback redirect is to inbox
         response = self.client.post(url, data)
@@ -607,6 +618,7 @@ class ViewTest(BaseTest):
 
         response = self.client.post(reverse('postman_reply_moderate', args=[pk]), data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
+        # the check_contrib_messages() in test_write_post_moderate() is enough
         self.check_status(Message.objects.get(pk=pk+1), status=STATUS_REJECTED, recipient_deleted_at=True,
             parent=m, thread=m,
             moderation_date=True, moderation_reason="some reason")
@@ -717,7 +729,7 @@ class ViewTest(BaseTest):
         response = self.client.get(url)
         self.assertEqual(len(response.context['pm_messages']), 2)
 
-    def check_update(self, view_name, field_bit, pk, field_value=None):
+    def check_update(self, view_name, success_msg, field_bit, pk, field_value=None):
         "Check permission, redirection, field updates, invalid cases."
         url = reverse(view_name)
         url_with_success_url = reverse(view_name + '_with_success_url_to_archives')
@@ -729,8 +741,9 @@ class ViewTest(BaseTest):
         self.assertTrue(self.client.login(username='foo', password='pass'))
         # default redirect is to the requestor page
         redirect_url = reverse('postman_sent')
-        response = self.client.post(url, data, HTTP_REFERER=redirect_url)
+        response = self.client.post(url, data, HTTP_REFERER=redirect_url, follow=True)  # 'follow' to access messages
         self.assertRedirects(response, redirect_url)
+        self.check_contrib_messages(response, success_msg)
         sender_kw = 'sender_{0}'.format(field_bit)
         recipient_kw = 'recipient_{0}'.format(field_bit)
         self.check_status(Message.objects.get(pk=pk),   status=STATUS_ACCEPTED, **{sender_kw: field_value})
@@ -747,8 +760,9 @@ class ViewTest(BaseTest):
         response = self.client.post(url_with_success_url + '?next=' + redirect_url, data, HTTP_REFERER='does not matter')
         self.assertRedirects(response, redirect_url)
         # missing payload
-        response = self.client.post(url)
+        response = self.client.post(url, follow=True)
         self.assertRedirects(response, reverse('postman_inbox'))
+        self.check_contrib_messages(response, 'Select at least one object.')
 
         # not a POST
         response = self.client.get(url, data)
@@ -766,6 +780,7 @@ class ViewTest(BaseTest):
         self.assertTrue(self.client.login(username='foo', password='pass'))
         response = self.client.post(url, data)
         self.assertRedirects(response, reverse('postman_inbox'))
+        # contrib.messages are already tested with check_update()
         sender_kw = 'sender_{0}'.format(field_bit)
         recipient_kw = 'recipient_{0}'.format(field_bit)
         self.check_status(Message.objects.get(pk=pk), status=STATUS_ACCEPTED, is_new=False, is_replied=True, thread=root_msg, **{sender_kw: field_value})
@@ -788,7 +803,7 @@ class ViewTest(BaseTest):
         self.c21()
         self.c12()
         self.c13()
-        self.check_update('postman_archive', 'archived', pk, True)
+        self.check_update('postman_archive', 'Messages or conversations successfully archived.', 'archived', pk, True)
 
     def test_archive_conversation(self):
         "Test archive action on conversations."
@@ -804,7 +819,7 @@ class ViewTest(BaseTest):
         self.c21()
         self.c12()
         self.c13()
-        self.check_update('postman_delete', 'deleted_at', pk, True)
+        self.check_update('postman_delete', 'Messages or conversations successfully deleted.', 'deleted_at', pk, True)
 
     def test_delete_conversation(self):
         "Test delete action on conversations."
@@ -820,7 +835,7 @@ class ViewTest(BaseTest):
         self.c21(recipient_deleted_at=now())
         self.c12(sender_deleted_at=now())
         self.c13()
-        self.check_update('postman_undelete', 'deleted_at', pk)
+        self.check_update('postman_undelete', 'Messages or conversations successfully recovered.', 'deleted_at', pk)
 
     def test_undelete_conversation(self):
         "Test undelete action on conversations."

@@ -100,7 +100,7 @@ from .views import (InboxView, SentView, ArchivesView, TrashView,
         ArchiveView, DeleteView, UndeleteView)
 
 
-urlpatterns = patterns('postman.views',
+urlpatterns = patterns('',
     url(r'^inbox/(?:(?P<option>'+OPTIONS+')/)?$', InboxView.as_view(), name='postman_inbox'),
     url(r'^sent/(?:(?P<option>'+OPTIONS+')/)?$', SentView.as_view(), name='postman_sent'),
     url(r'^archives/(?:(?P<option>'+OPTIONS+')/)?$', ArchivesView.as_view(), name='postman_archives'),

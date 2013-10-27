@@ -59,7 +59,7 @@ def format_subject(subject):
 def format_body(sender, body):
     return "{0} _ {1}".format(sender, body)
 
-postman_patterns = patterns('postman.views',
+postman_patterns = patterns('',
     # Basic set
     url(r'^inbox/(?:(?P<option>'+OPTIONS+')/)?$', InboxView.as_view(), name='postman_inbox'),
     url(r'^sent/(?:(?P<option>'+OPTIONS+')/)?$', SentView.as_view(), name='postman_sent'),

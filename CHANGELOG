@@ -2,6 +2,13 @@
 Django Postman changelog
 ========================
 
+Version 3.0.2, October 2013
+---------------------------
+* Rename test_urls.py to urls_for_tests.py, for adjustment with the new test discovery feature of Django 1.6.
+* Fix the need for some translations to become lazy, introduced by the conversion to class-based views.
+* Fix issue #36, BooleanField definition needs an explicit default value for Django 1.6.
+* Fix issue #35, the app can work without the sites framework.
+
 Version 3.0.1, August 2013
 --------------------------
 * Fix issue #32, an IndexError when a Paginator is used and the folder is empty.

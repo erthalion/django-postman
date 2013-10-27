@@ -3,15 +3,16 @@
 # This file is distributed under the same license as the django-postman package.
 # 
 # Translators:
-# Patrick Samson <maxcom@laposte.net>, 2011.
+# Gwildor <gwildorsok@gmail.com>, 2013
+# Patrick Samson <maxcom@laposte.net>, 2011
 msgid ""
 msgstr ""
 "Project-Id-Version: django-postman\n"
 "Report-Msgid-Bugs-To: http://bitbucket.org/psam/django-postman/issues\n"
-"POT-Creation-Date: 2012-12-10 23:13+0100\n"
-"PO-Revision-Date: 2010-12-27 15:10+0000\n"
-"Last-Translator: Patrick Samson <maxcom@laposte.net>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2012-12-10 23:00+0100\n"
+"PO-Revision-Date: 2013-10-11 14:53+0000\n"
+"Last-Translator: Gwildor <gwildorsok@gmail.com>\n"
+"Language-Team: Dutch (http://www.transifex.com/projects/p/django-postman/language/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -137,7 +138,7 @@ msgstr ""
 
 #: .\models.py:28
 msgid "Accepted"
-msgstr ""
+msgstr "Geaccepteerd"
 
 #: .\models.py:29 .\templates\postman\view.html.py:14
 msgid "Rejected"
@@ -245,11 +246,7 @@ msgid ""
 "\n"
 "{sender} wrote:\n"
 "{body}\n"
-msgstr ""
-"\n"
-"\n"
-"{sender} schreef:\n"
-"{body}\n"
+msgstr "\n\n{sender} schreef:\n{body}\n"
 
 #: .\utils.py:63
 msgid "Re: {subject}"
@@ -261,7 +258,7 @@ msgstr "Bericht succesvol verstuurd."
 
 #: .\views.py:146 .\views.py:208
 msgid "Message rejected for at least one recipient."
-msgstr ""
+msgstr "Bericht geweigerd voor ten minste een ontvanger."
 
 #: .\views.py:299
 msgid "Select at least one object."
@@ -311,7 +308,7 @@ msgstr[1] "Herstel de fouten hieronder."
 
 #: .\templates\admin\postman\pendingmessage\submit_line.html.py:6
 msgid "Accept"
-msgstr ""
+msgstr "Accepteer"
 
 #: .\templates\admin\postman\pendingmessage\submit_line.html.py:7
 msgid "Reject"
@@ -325,7 +322,7 @@ msgstr ""
 msgid ""
 "Messages in this folder will never be removed. You can use this folder for "
 "long term storage."
-msgstr ""
+msgstr "Berichten in deze map worden nooit verwijderd. Je kunt deze map gebruiken voor langdurige opslag."
 
 #: .\templates\postman\base.html.py:4
 msgid "Messaging"
@@ -423,7 +420,7 @@ msgstr ""
 #: .\templates\postman\email_user.txt.py:5
 #: .\templates\postman\email_visitor.txt.py:5
 msgid ", for the following reason:"
-msgstr ""
+msgstr ", voor de volgende reden:"
 
 #: .\templates\postman\email_user.txt.py:9
 #: .\templates\postman\email_visitor.txt.py:10
@@ -460,7 +457,7 @@ msgstr "De sitebeheerder"
 msgid ""
 "Note: This message is issued by an automated system.\n"
 "Do not reply, this would not be taken into account."
-msgstr ""
+msgstr "NB: Dit bericht is verstuurd door een automatisch systeem.\nReageren helpt niet, dat wordt niet verwerkt."
 
 #: .\templates\postman\email_user_subject.txt.py:1
 #: .\templates\postman\email_visitor_subject.txt.py:1
@@ -509,7 +506,7 @@ msgstr "Verwijderde berichten"
 msgid ""
 "Messages in this folder can be removed from time to time. For long term "
 "storage, use instead the archive folder."
-msgstr ""
+msgstr "Berichten in deze map kunnen van tijd tot tijd verwijderd worden. Gebruik de archiefmap voor langdurige opslag."
 
 #: .\templates\postman\view.html.py:6
 msgid "Conversation"
