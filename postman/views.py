@@ -310,12 +310,17 @@ class DisplayMixin(object):
     def dispatch(self, *args, **kwargs):
         return super(DisplayMixin, self).dispatch(*args, **kwargs)
 
+    def set_read(self, user):
+        """ Override this method for the caching and other purposes
+        """
+        Message.objects.set_read(user, self.filter)
+
     def get(self, request, *args, **kwargs):
         user = request.user
         self.msgs = Message.objects.thread(user, self.filter)
         if not self.msgs:
             raise Http404
-        Message.objects.set_read(user, self.filter)
+        self.set_read(user)
         return super(DisplayMixin, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
