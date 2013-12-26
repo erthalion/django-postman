@@ -18,18 +18,18 @@ class Command(NoArgsCommand):
             ("Sender and Recipient cannot be both undefined.", Q(sender__isnull=True, recipient__isnull=True)),
             ("Visitor's email is in excess.", Q(sender__isnull=False, recipient__isnull=False) & ~Q(email='')),
             ("Visitor's email is missing.", (Q(sender__isnull=True) | Q(recipient__isnull=True)) & Q(email='')),
-            ("Reading date must be later to sending date.", Q(read_at__lt=F('sent_at'))),
-            ("Deletion date by sender must be later to sending date.", Q(sender_deleted_at__lt=F('sent_at'))),
-            ("Deletion date by recipient must be later to sending date.", Q(recipient_deleted_at__lt=F('sent_at'))),
-            ("Response date must be later to sending date.", Q(replied_at__lt=F('sent_at'))),
-            ("The message cannot be replied without having been read.", Q(replied_at__isnull=False, read_at__isnull=True)),
-            ("Response date must be later to reading date.", Q(replied_at__lt=F('read_at'))),
-            # because of the delay due to the moderation, no constraint between replied_at and recipient_deleted_at
+            ("Reading date must be later to sending date.", Q(read_time__lt=F('sent_time'))),
+            ("Deletion date by sender must be later to sending date.", Q(sender_deleted_time__lt=F('sent_time'))),
+            ("Deletion date by recipient must be later to sending date.", Q(recipient_deleted_time__lt=F('sent_time'))),
+            ("Response date must be later to sending date.", Q(replied_time__lt=F('sent_time'))),
+            ("The message cannot be replied without having been read.", Q(replied_time__isnull=False, read_time__isnull=True)),
+            ("Response date must be later to reading date.", Q(replied_time__lt=F('read_time'))),
+            # because of the delay due to the moderation, no constraint between replied_time and recipient_deleted_time
             ("Response date cannot be set without at least one reply.",
-                Q(replied_at__isnull=False), {'cnt': Count('next_messages')}, Q(cnt=0)),
+                Q(replied_time__isnull=False), {'cnt': Count('next_messages')}, Q(cnt=0)),
                 # cnt should filter to allow only accepted replies, but do not know how to specify it
             ("The message cannot be replied without being in a conversation.",
-                Q(replied_at__isnull=False, thread__isnull=True)),
+                Q(replied_time__isnull=False, thread__isnull=True)),
             ("The message cannot be a reply without being in a conversation.",
                 Q(parent__isnull=False, thread__isnull=True)),
             ("The reply and its parent are not in a conversation in common.",
@@ -55,4 +55,4 @@ class Command(NoArgsCommand):
         for msg in msgs:
             self.stderr.write(
                 "  {0.pk:6} {0.sender_id:5} {0.recipient_id:5} {0.email:10.10} {0.parent_id:6} {0.thread_id:6}"
-                " {0.sent_at!s:16.16} {0.read_at!s:16.16} {0.replied_at!s:16.16}\n".format(msg))
+                " {0.sent_time!s:16.16} {0.read_time!s:16.16} {0.replied_time!s:16.16}\n".format(msg))

@@ -29,7 +29,7 @@ ORDER_BY_FIELDS = {
     'f': 'sender__' + get_user_model().USERNAME_FIELD,     # as 'from'
     't': 'recipient__' + get_user_model().USERNAME_FIELD,  # as 'to'
     's': 'subject',  # as 'subject'
-    'd': 'sent_at',  # as 'date'
+    'd': 'sent_time',  # as 'date'
 }
 ORDER_BY_MAPPER = {'sender': 'f', 'recipient': 't', 'subject': 's', 'date': 'd'}  # for templatetags usage
 
@@ -96,7 +96,7 @@ class MessageManager(models.Manager):
         filters = {
             'recipient': user,
             'recipient_archived': False,
-            'recipient_deleted_at__isnull': True,
+            'recipient_deleted_time__isnull': True,
         }
         return self._folder(related, filters, **kwargs)
 
@@ -107,7 +107,7 @@ class MessageManager(models.Manager):
         Designed for context_processors.py and templatetags/postman_tags.py
 
         """
-        return self.inbox(user, related=False, option=OPTION_MESSAGES).filter(read_at__isnull=True).count()
+        return self.inbox(user, related=False, option=OPTION_MESSAGES).filter(read_time__isnull=True).count()
 
     def sent(self, user, **kwargs):
         """
@@ -117,7 +117,7 @@ class MessageManager(models.Manager):
         filters = {
             'sender': user,
             'sender_archived': False,
-            'sender_deleted_at__isnull': True,
+            'sender_deleted_time__isnull': True,
         }
         return self._folder(related, filters, **kwargs)
 
@@ -129,11 +129,11 @@ class MessageManager(models.Manager):
         filters = ({
             'recipient': user,
             'recipient_archived': True,
-            'recipient_deleted_at__isnull': True,
+            'recipient_deleted_time__isnull': True,
         }, {
             'sender': user,
             'sender_archived': True,
-            'sender_deleted_at__isnull': True,
+            'sender_deleted_time__isnull': True,
         })
         return self._folder(related, filters, **kwargs)
 
@@ -144,10 +144,10 @@ class MessageManager(models.Manager):
         related = ('sender', 'recipient')
         filters = ({
             'recipient': user,
-            'recipient_deleted_at__isnull': False,
+            'recipient_deleted_time__isnull': False,
         }, {
             'sender': user,
-            'sender_deleted_at__isnull': False,
+            'sender_deleted_time__isnull': False,
         })
         return self._folder(related, filters, **kwargs)
 
@@ -158,7 +158,7 @@ class MessageManager(models.Manager):
         return self.select_related('sender', 'recipient').filter(
             filter,
             models.Q(recipient=user) | models.Q(sender=user),
-        ).order_by('sent_at')
+        ).order_by('sent_time')
 
     def as_recipient(self, user, filter):
         """
@@ -179,7 +179,7 @@ class MessageManager(models.Manager):
         The user must be the recipient of the accepted, non-deleted, message
 
         """
-        return models.Q(recipient=user) & models.Q(recipient_deleted_at__isnull=True)
+        return models.Q(recipient=user) & models.Q(recipient_deleted_time__isnull=True)
 
     def set_read(self, user, filter):
         """
@@ -188,8 +188,8 @@ class MessageManager(models.Manager):
         return self.filter(
             filter,
             recipient=user,
-            read_at__isnull=True,
-        ).update(read_at=now())
+            read_time__isnull=True,
+        ).update(read_time=now())
 
 
 class Message(models.Model):
@@ -199,26 +199,27 @@ class Message(models.Model):
 
     SUBJECT_MAX_LENGTH = 120
 
+    sid = models.AutoField(primary_key=True)
     subject = models.CharField(_("subject"), max_length=SUBJECT_MAX_LENGTH)
     body = models.TextField(_("body"), blank=True)
     sender = models.ForeignKey(get_user_model(), related_name='sent_messages', null=True, blank=True, verbose_name=_("sender"))
     recipient = models.ForeignKey(get_user_model(), related_name='received_messages', null=True, blank=True, verbose_name=_("recipient"))
     parent = models.ForeignKey('self', related_name='next_messages', null=True, blank=True, verbose_name=_("parent message"))
     thread = models.ForeignKey('self', related_name='child_messages', null=True, blank=True, verbose_name=_("root message"))
-    sent_at = models.DateTimeField(_("sent at"), default=now)
-    read_at = models.DateTimeField(_("read at"), null=True, blank=True)
-    replied_at = models.DateTimeField(_("replied at"), null=True, blank=True)
+    sent_time = models.DateTimeField(_("sent at"), default=now)
+    read_time = models.DateTimeField(_("read at"), null=True, blank=True)
+    replied_time = models.DateTimeField(_("replied at"), null=True, blank=True)
     sender_archived = models.BooleanField(_("archived by sender"), default=False)
     recipient_archived = models.BooleanField(_("archived by recipient"), default=False)
-    sender_deleted_at = models.DateTimeField(_("deleted by sender at"), null=True, blank=True)
-    recipient_deleted_at = models.DateTimeField(_("deleted by recipient at"), null=True, blank=True)
+    sender_deleted_time = models.DateTimeField(_("deleted by sender at"), null=True, blank=True)
+    recipient_deleted_time = models.DateTimeField(_("deleted by recipient at"), null=True, blank=True)
 
     objects = MessageManager()
 
     class Meta:
         verbose_name = _("message")
         verbose_name_plural = _("messages")
-        ordering = ['-sent_at', '-id']
+        ordering = ['-sent_time', '-id']
 
     def __unicode__(self):
         return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, Truncator(self.subject).words(5))
@@ -229,12 +230,12 @@ class Message(models.Model):
     @property
     def is_new(self):
         """Tell if the recipient has not yet read the message."""
-        return self.read_at is None
+        return self.read_time is None
 
     @property
     def is_replied(self):
         """Tell if the recipient has written a reply to the message."""
-        return self.replied_at is not None
+        return self.replied_time is not None
 
     def _obfuscated_email(self):
         """
@@ -323,28 +324,28 @@ class Message(models.Model):
         """Do some auto-read and auto-delete, because there is no one to do it (no account)."""
         if not self.sender_id:
             # no need to wait for a final moderation status to mark as deleted
-            if not self.sender_deleted_at:
-                self.sender_deleted_at = now()
+            if not self.sender_deleted_time:
+                self.sender_deleted_time = now()
         elif not self.recipient_id:
             if self.is_accepted():
-                if not self.read_at:
-                    self.read_at = now()
-                if not self.recipient_deleted_at:
-                    self.recipient_deleted_at = now()
+                if not self.read_time:
+                    self.read_time = now()
+                if not self.recipient_deleted_time:
+                    self.recipient_deleted_time = now()
             else:
                 # rollbacks
-                if self.read_at:
-                    self.read_at = None
+                if self.read_time:
+                    self.read_time = None
                 # but stay deleted if rejected
-                if self.is_pending() and self.recipient_deleted_at:
-                    self.recipient_deleted_at = None
+                if self.is_pending() and self.recipient_deleted_time:
+                    self.recipient_deleted_time = None
 
     def get_dates(self):
         """Get some dates to restore later."""
-        return (self.sender_deleted_at, self.recipient_deleted_at, self.read_at)
+        return (self.sender_deleted_time, self.recipient_deleted_time, self.read_time)
 
-    def set_dates(self, sender_deleted_at, recipient_deleted_at, read_at):
+    def set_dates(self, sender_deleted_time, recipient_deleted_time, read_time):
         """Restore some dates."""
-        self.sender_deleted_at = sender_deleted_at
-        self.recipient_deleted_at = recipient_deleted_at
-        self.read_at = read_at
+        self.sender_deleted_time = sender_deleted_time
+        self.recipient_deleted_time = recipient_deleted_time
+        self.read_time = read_time

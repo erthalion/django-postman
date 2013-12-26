@@ -32,12 +32,12 @@ class Command(NoArgsCommand):
         # for a conversation to be candidate, all messages must satisfy the criteria
         tpks = Message.objects.filter(thread__isnull=False).values('thread').annotate(
                 cnt=Count('pk'),
-                s_max=Max('sender_deleted_at'),    s_cnt=Count('sender_deleted_at'),
-                r_max=Max('recipient_deleted_at'), r_cnt=Count('recipient_deleted_at')
+                s_max=Max('sender_deleted_time'),    s_cnt=Count('sender_deleted_time'),
+                r_max=Max('recipient_deleted_time'), r_cnt=Count('recipient_deleted_time')
             ).order_by().filter(
                 s_cnt=F('cnt'), r_cnt=F('cnt'), s_max__lte=date, r_max__lte=date
             ).values_list('thread', flat=True)
         Message.objects.filter(
             Q(thread__in=tpks) |
-            Q(thread__isnull=True, sender_deleted_at__lte=date, recipient_deleted_at__lte=date)
+            Q(thread__isnull=True, sender_deleted_time__lte=date, recipient_deleted_time__lte=date)
         ).delete()

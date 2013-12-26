@@ -119,7 +119,7 @@ class BaseTest(TestCase):
     def check_status(self, m, status=STATUS_PENDING, is_new=True, is_replied=False, parent=None, thread=None,
         moderation_date=False, moderation_by=None, moderation_reason='',
         sender_archived=False, recipient_archived=False,
-        sender_deleted_at=False, recipient_deleted_at=False):
+        sender_deleted_time=False, recipient_deleted_time=False):
         "Check a bunch of properties of a message."
 
         self.assertEqual(m.is_pending(), status==STATUS_PENDING)
@@ -127,25 +127,25 @@ class BaseTest(TestCase):
         self.assertEqual(m.is_accepted(), status==STATUS_ACCEPTED)
         self.assertEqual(m.is_new, is_new)
         self.assertEqual(m.is_replied, is_replied)
-        self.check_now(m.sent_at)
+        self.check_now(m.sent_time)
         self.assertEqual(m.parent, parent)
         self.assertEqual(m.thread, thread)
         self.assertEqual(m.sender_archived, sender_archived)
         self.assertEqual(m.recipient_archived, recipient_archived)
-        if sender_deleted_at:
-            if isinstance(sender_deleted_at, datetime):
-                self.assertEqual(m.sender_deleted_at, sender_deleted_at)
+        if sender_deleted_time:
+            if isinstance(sender_deleted_time, datetime):
+                self.assertEqual(m.sender_deleted_time, sender_deleted_time)
             else:
-                self.assertNotEqual(m.sender_deleted_at, None)
+                self.assertNotEqual(m.sender_deleted_time, None)
         else:
-            self.assertEqual(m.sender_deleted_at, None)
-        if recipient_deleted_at:
-            if isinstance(recipient_deleted_at, datetime):
-                self.assertEqual(m.recipient_deleted_at, recipient_deleted_at)
+            self.assertEqual(m.sender_deleted_time, None)
+        if recipient_deleted_time:
+            if isinstance(recipient_deleted_time, datetime):
+                self.assertEqual(m.recipient_deleted_time, recipient_deleted_time)
             else:
-                self.assertNotEqual(m.recipient_deleted_at, None)
+                self.assertNotEqual(m.recipient_deleted_time, None)
         else:
-            self.assertEqual(m.recipient_deleted_at, None)
+            self.assertEqual(m.recipient_deleted_time, None)
         if moderation_date:
             if isinstance(moderation_date, datetime):
                 self.assertEqual(m.moderation_date, moderation_date)
@@ -234,9 +234,9 @@ class ViewTest(BaseTest):
     def test_template(self):
         "Test the 'template_name' parameter."
         m1 = self.c12()
-        m1.read_at, m1.thread = now(), m1
+        m1.read_time, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
-        m1.replied_at = m2.sent_at; m1.save()
+        m1.replied_time = m2.sent_time; m1.save()
         self.assertTrue(self.client.login(username='foo', password='pass'))
         for actions, args in [
             (('inbox', 'sent', 'archives', 'trash', 'write'), []),
@@ -319,7 +319,7 @@ class ViewTest(BaseTest):
         self.assertEqual(m.sender, self.user1 if not is_anonymous else None)
         self.assertEqual(m.recipient.get_username(), recipient_username)
         if is_anonymous:
-            self.check_status(m, sender_deleted_at=True)
+            self.check_status(m, sender_deleted_time=True)
         self.assertEqual(len(mail.outbox), 0)
 
     def check_contrib_messages(self, response, text):
@@ -437,7 +437,7 @@ class ViewTest(BaseTest):
         response = self.client.post(reverse('postman_write_moderate'), data, HTTP_REFERER=url, follow=True)
         self.assertRedirects(response, url)
         self.check_contrib_messages(response, 'Message rejected for at least one recipient.')
-        self.check_status(Message.objects.get(), status=STATUS_REJECTED, recipient_deleted_at=True,
+        self.check_status(Message.objects.get(), status=STATUS_REJECTED, recipient_deleted_time=True,
             moderation_date=True, moderation_reason="some reason")
 
     def test_write_notification(self):
@@ -517,7 +517,7 @@ class ViewTest(BaseTest):
         # existent message but not yet visible to you
         self.check_reply_404(Message.objects.get(pk=self.create(sender=self.user2, recipient=self.user1).pk).pk)
         # cannot reply to a deleted message
-        self.check_reply_404(Message.objects.get(pk=self.c21(recipient_deleted_at=now()).pk).pk)
+        self.check_reply_404(Message.objects.get(pk=self.c21(recipient_deleted_time=now()).pk).pk)
 
     def test_reply_querystring(self):
         "Test the prefilling by query string."
@@ -619,7 +619,7 @@ class ViewTest(BaseTest):
         response = self.client.post(reverse('postman_reply_moderate', args=[pk]), data, HTTP_REFERER=url)
         self.assertRedirects(response, url)
         # the check_contrib_messages() in test_write_post_moderate() is enough
-        self.check_status(Message.objects.get(pk=pk+1), status=STATUS_REJECTED, recipient_deleted_at=True,
+        self.check_status(Message.objects.get(pk=pk+1), status=STATUS_REJECTED, recipient_deleted_time=True,
             parent=m, thread=m,
             moderation_date=True, moderation_reason="some reason")
 
@@ -677,9 +677,9 @@ class ViewTest(BaseTest):
         "Test permission, what template and form are used, number of messages in the conversation, set-as-read."
         template = "postman/view.html"
         m1 = self.c12()
-        m1.read_at, m1.thread = now(), m1
+        m1.read_time, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
-        m1.replied_at = m2.sent_at; m1.save()
+        m1.replied_time = m2.sent_time; m1.save()
         url = reverse('postman_view_conversation', args=[m1.pk])
         self.check_status(Message.objects.get(pk=m1.pk), status=STATUS_ACCEPTED, is_new=False, is_replied=True, thread=m1)
         # anonymous
@@ -706,15 +706,15 @@ class ViewTest(BaseTest):
         self.check_view_conversation_404(1000)
         # existent conversation but not yours
         m1 = self.c23()
-        m1.read_at, m1.thread = now(), m1
+        m1.read_time, m1.thread = now(), m1
         m2 = self.c32(parent=m1, thread=m1.thread)
-        m1.replied_at = m2.sent_at; m1.save()
+        m1.replied_time = m2.sent_time; m1.save()
         self.check_view_conversation_404(m1.thread_id)
 
     def test_view_conversation(self):
         "Test message visibility."
         m1 = self.c12()
-        m1.read_at, m1.thread = now(), m1
+        m1.read_time, m1.thread = now(), m1
         m1.save()
         m2 = self.create(sender=self.user2, recipient=self.user1, parent=m1, thread=m1.thread)
         url = reverse('postman_view_conversation', args=[m1.pk])
@@ -808,9 +808,9 @@ class ViewTest(BaseTest):
     def test_archive_conversation(self):
         "Test archive action on conversations."
         m1 = self.c12()
-        m1.read_at, m1.thread = now(), m1
+        m1.read_time, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
-        m1.replied_at = m2.sent_at; m1.save()
+        m1.replied_time = m2.sent_time; m1.save()
         self.check_update_conversation('postman_archive', m1, 'archived', True)
 
     def test_delete(self):
@@ -824,25 +824,25 @@ class ViewTest(BaseTest):
     def test_delete_conversation(self):
         "Test delete action on conversations."
         m1 = self.c12()
-        m1.read_at, m1.thread = now(), m1
+        m1.read_time, m1.thread = now(), m1
         m2 = self.c21(parent=m1, thread=m1.thread)
-        m1.replied_at = m2.sent_at; m1.save()
+        m1.replied_time = m2.sent_time; m1.save()
         self.check_update_conversation('postman_delete', m1, 'deleted_at', True)
 
     def test_undelete(self):
         "Test undelete action on messages."
-        pk = self.c12(sender_deleted_at=now()).pk
-        self.c21(recipient_deleted_at=now())
-        self.c12(sender_deleted_at=now())
+        pk = self.c12(sender_deleted_time=now()).pk
+        self.c21(recipient_deleted_time=now())
+        self.c12(sender_deleted_time=now())
         self.c13()
         self.check_update('postman_undelete', 'Messages or conversations successfully recovered.', 'deleted_at', pk)
 
     def test_undelete_conversation(self):
         "Test undelete action on conversations."
-        m1 = self.c12(sender_deleted_at=now())
-        m1.read_at, m1.thread = now(), m1
-        m2 = self.c21(parent=m1, thread=m1.thread, recipient_deleted_at=now())
-        m1.replied_at = m2.sent_at; m1.save()
+        m1 = self.c12(sender_deleted_time=now())
+        m1.read_time, m1.thread = now(), m1
+        m2 = self.c21(parent=m1, thread=m1.thread, recipient_deleted_time=now())
+        m1.replied_time = m2.sent_time; m1.save()
         self.check_update_conversation('postman_undelete', m1, 'deleted_at')
 
 
@@ -938,8 +938,8 @@ class MessageManagerTest(BaseTest):
             return
         pk = self.c12().pk
         self.c21()
-        self.c12(sender_archived=True, recipient_deleted_at=now())
-        self.c21(sender_archived=True, recipient_deleted_at=now())
+        self.c12(sender_archived=True, recipient_deleted_time=now())
+        self.c21(sender_archived=True, recipient_deleted_time=now())
         for u in (self.user1, self.user2):
             with self.assertNumQueries(1):
                 msgs = list(Message.objects.sent(u, option=OPTION_MESSAGES))
@@ -978,20 +978,20 @@ class MessageManagerTest(BaseTest):
         """
 
         m1 = self.c12(moderation_status=STATUS_PENDING);
-        m2 = self.c12(moderation_status=STATUS_REJECTED, recipient_deleted_at=now())
+        m2 = self.c12(moderation_status=STATUS_REJECTED, recipient_deleted_time=now())
         m3 = self.c12()
-        m3.read_at, m3.thread = now(), m3
+        m3.read_time, m3.thread = now(), m3
         m4 = self.c21(parent=m3, thread=m3.thread)
-        m3.replied_at = m4.sent_at; m3.save()
-        m4.read_at = now()
+        m3.replied_time = m4.sent_time; m3.save()
+        m4.read_time = now()
         m5 = self.c12(parent=m4, thread=m4.thread)
-        m4.replied_at = m5.sent_at; m4.save()
+        m4.replied_time = m5.sent_time; m4.save()
         m6 = self.c12()
         m7 = self.c12()
-        m7.read_at = now(); m7.save()
+        m7.read_time = now(); m7.save()
         m8 = self.c21()
         m9 = self.c21(moderation_status=STATUS_PENDING)
-        m10 = self.c21(moderation_status=STATUS_REJECTED, recipient_deleted_at=now())
+        m10 = self.c21(moderation_status=STATUS_REJECTED, recipient_deleted_time=now())
 
         def pk(x): return x.pk
         def pk_cnt(x): return (x.pk, x.count)
@@ -1044,13 +1044,13 @@ class MessageManagerTest(BaseTest):
               x       X---    X
         """
         m1.sender_archived = True; m1.save()
-        m2.sender_deleted_at = now(); m2.save()
-        m3.sender_archived, m3.sender_deleted_at = True, now(); m3.save()
-        m4.sender_archived, m4.sender_deleted_at = True, now(); m4.save()
+        m2.sender_deleted_time = now(); m2.save()
+        m3.sender_archived, m3.sender_deleted_time = True, now(); m3.save()
+        m4.sender_archived, m4.sender_deleted_time = True, now(); m4.save()
         m6.sender_archived, m6.recipient_archived = True, True; m6.save()
-        m7.recipient_deleted_at = now(); m7.save()
-        m8.recipient_deleted_at = now(); m8.save()
-        m9.sender_deleted_at = now(); m9.save()
+        m7.recipient_deleted_time = now(); m7.save()
+        m8.recipient_deleted_time = now(); m8.save()
+        m9.sender_deleted_time = now(); m9.save()
         m10.sender_archived = True; m10.save()
         self.assertEqual(Message.objects.inbox_unread_count(self.user1), 0)
         self.assertEqual(Message.objects.inbox_unread_count(self.user2), 1)
@@ -1077,15 +1077,15 @@ class MessageManagerTest(BaseTest):
         self.assertEqual(Message.objects.set_read(self.user2, Q(thread=m3.pk)), 1)
         m = Message.objects.get(pk=m5.pk)
         self.check_status(m, status=STATUS_ACCEPTED, is_new=False, parent=m4, thread=m3)
-        self.check_now(m.read_at)
+        self.check_now(m.read_time)
         self.assertEqual(Message.objects.set_read(self.user2, Q(pk=m6.pk)), 1)
         m = Message.objects.get(pk=m6.pk)
         self.check_status(m, status=STATUS_ACCEPTED, is_new=False, sender_archived=True, recipient_archived=True)
-        self.check_now(m.read_at)
+        self.check_now(m.read_time)
         self.assertEqual(Message.objects.set_read(self.user1, Q(pk=m8.pk)), 1)
         m = Message.objects.get(pk=m8.pk)
-        self.check_status(m, status=STATUS_ACCEPTED, is_new=False, recipient_deleted_at=True)
-        self.check_now(m.read_at)
+        self.check_status(m, status=STATUS_ACCEPTED, is_new=False, recipient_deleted_time=True)
+        self.check_now(m.read_time)
 
 
 class MessageTest(BaseTest):
@@ -1143,9 +1143,9 @@ class MessageTest(BaseTest):
         self.check_status(m, status=STATUS_REJECTED)
         m = Message.objects.create(subject='s', moderation_status=STATUS_ACCEPTED)
         self.check_status(m, status=STATUS_ACCEPTED)
-        m = Message.objects.create(subject='s', read_at=now())
+        m = Message.objects.create(subject='s', read_time=now())
         self.check_status(m, is_new=False)
-        m = Message.objects.create(subject='s', replied_at=now())
+        m = Message.objects.create(subject='s', replied_time=now())
         self.check_status(m, is_replied=True)
 
     def test_moderated_count(self):
@@ -1167,9 +1167,9 @@ class MessageTest(BaseTest):
         m.moderation_status = STATUS_REJECTED
         m.clean_moderation(STATUS_PENDING, self.user1)  # one try with moderator
         self.check_status(m, status=STATUS_REJECTED,
-            moderation_date=True, moderation_by=self.user1, recipient_deleted_at=True)
+            moderation_date=True, moderation_by=self.user1, recipient_deleted_time=True)
         self.check_now(m.moderation_date)
-        self.check_now(m.recipient_deleted_at)
+        self.check_now(m.recipient_deleted_time)
         # pending -> accepted
         m = copy.copy(msg)
         m.moderation_status = STATUS_ACCEPTED
@@ -1183,19 +1183,19 @@ class MessageTest(BaseTest):
         reason = 'some good reason'
         msg = Message.objects.create(subject='s', moderation_status=STATUS_REJECTED,
             moderation_date=date_in_past, moderation_by=self.user1, moderation_reason=reason,
-            recipient_deleted_at=date_in_past)
+            recipient_deleted_time=date_in_past)
         # rejected -> rejected: nothing changes
         m = copy.copy(msg)
         m.clean_moderation(STATUS_REJECTED, self.user2)
         self.check_status(m, status=STATUS_REJECTED,
             moderation_date=date_in_past, moderation_by=self.user1, moderation_reason=reason,
-            recipient_deleted_at=date_in_past)
+            recipient_deleted_time=date_in_past)
         # rejected -> pending
         m = copy.copy(msg)
         m.moderation_status = STATUS_PENDING
         m.clean_moderation(STATUS_REJECTED)  # one try without moderator
         self.check_status(m, status=STATUS_PENDING,
-            moderation_date=True, moderation_reason=reason, recipient_deleted_at=False)
+            moderation_date=True, moderation_reason=reason, recipient_deleted_time=False)
         self.check_now(m.moderation_date)
         # rejected -> accepted
         m = copy.copy(msg)
@@ -1203,33 +1203,33 @@ class MessageTest(BaseTest):
         m.clean_moderation(STATUS_REJECTED, self.user2)  # one try with moderator
         self.check_status(m, status=STATUS_ACCEPTED,
             moderation_date=True, moderation_by=self.user2, moderation_reason=reason,
-            recipient_deleted_at=False)
+            recipient_deleted_time=False)
         self.check_now(m.moderation_date)
 
     def test_moderation_from_accepted(self):
         "Test moderation management when leaving 'accepted' status."
         date_in_past = now() - timedelta(days=2)  # any value, just to avoid now()
         msg = Message.objects.create(subject='s', moderation_status=STATUS_ACCEPTED,
-            moderation_date=date_in_past, moderation_by=self.user1, recipient_deleted_at=date_in_past)
+            moderation_date=date_in_past, moderation_by=self.user1, recipient_deleted_time=date_in_past)
         # accepted -> accepted: nothing changes
         m = copy.copy(msg)
         m.clean_moderation(STATUS_ACCEPTED, self.user2)
         self.check_status(m, status=STATUS_ACCEPTED,
-            moderation_date=date_in_past, moderation_by=self.user1, recipient_deleted_at=date_in_past)
+            moderation_date=date_in_past, moderation_by=self.user1, recipient_deleted_time=date_in_past)
         # accepted -> pending
         m = copy.copy(msg)
         m.moderation_status = STATUS_PENDING
         m.clean_moderation(STATUS_ACCEPTED, self.user2)  # one try with moderator
         self.check_status(m, status=STATUS_PENDING,
-            moderation_date=True, moderation_by=self.user2, recipient_deleted_at=date_in_past)
+            moderation_date=True, moderation_by=self.user2, recipient_deleted_time=date_in_past)
         self.check_now(m.moderation_date)
         # accepted -> rejected
         m = copy.copy(msg)
         m.moderation_status = STATUS_REJECTED
         m.clean_moderation(STATUS_ACCEPTED)  # one try without moderator
-        self.check_status(m, status=STATUS_REJECTED, moderation_date=True, recipient_deleted_at=True)
+        self.check_status(m, status=STATUS_REJECTED, moderation_date=True, recipient_deleted_time=True)
         self.check_now(m.moderation_date)
-        self.check_now(m.recipient_deleted_at)
+        self.check_now(m.recipient_deleted_time)
 
     def test_visitor(self):
         "Test clean_for_visitor()."
@@ -1237,30 +1237,30 @@ class MessageTest(BaseTest):
         # as the sender
         m = Message.objects.create(subject='s', recipient=self.user1)
         m.clean_for_visitor()
-        self.check_status(m, sender_deleted_at=True)
-        self.check_now(m.sender_deleted_at)
+        self.check_status(m, sender_deleted_time=True)
+        self.check_now(m.sender_deleted_time)
         # as the recipient
         msg = Message.objects.create(subject='s', sender=self.user1)
         # pending
         m = copy.copy(msg)
-        m.read_at=date_in_past
-        m.recipient_deleted_at=date_in_past
+        m.read_time=date_in_past
+        m.recipient_deleted_time=date_in_past
         m.clean_for_visitor()
-        self.check_status(m, recipient_deleted_at=False)
+        self.check_status(m, recipient_deleted_time=False)
         # rejected
         m = copy.copy(msg)
         m.moderation_status = STATUS_REJECTED
-        m.read_at=date_in_past
-        m.recipient_deleted_at=date_in_past
+        m.read_time=date_in_past
+        m.recipient_deleted_time=date_in_past
         m.clean_for_visitor()
-        self.check_status(m, status=STATUS_REJECTED, recipient_deleted_at=date_in_past)
+        self.check_status(m, status=STATUS_REJECTED, recipient_deleted_time=date_in_past)
         # accepted
         m = copy.copy(msg)
         m.moderation_status = STATUS_ACCEPTED
         m.clean_for_visitor()
-        self.check_status(m, status=STATUS_ACCEPTED, is_new=False, recipient_deleted_at=True)
-        self.check_now(m.read_at)
-        self.check_now(m.recipient_deleted_at)
+        self.check_status(m, status=STATUS_ACCEPTED, is_new=False, recipient_deleted_time=True)
+        self.check_now(m.read_time)
+        self.check_now(m.recipient_deleted_time)
 
     def test_update_parent(self):
         "Test update_parent()."
@@ -1287,24 +1287,24 @@ class MessageTest(BaseTest):
         r.update_parent(STATUS_PENDING)
         p = Message.objects.get(pk=parent.pk)  # better to ask the DB to check the save()
         self.check_status(p, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        self.assertEqual(p.replied_at.timetuple(), r.sent_at.timetuple())  # mysql doesn't store microseconds
+        self.assertEqual(p.replied_time.timetuple(), r.sent_time.timetuple())  # mysql doesn't store microseconds
         # rejected -> accepted: same as pending -> accepted
         # so check here the acceptance of an anterior date
         # note: use again the some object for convenience but another reply is more realistic
-        r.sent_at = r.sent_at - timedelta(days=1)
+        r.sent_time = r.sent_time - timedelta(days=1)
         r.update_parent(STATUS_REJECTED)
         p = Message.objects.get(pk=parent.pk)
         self.check_status(p, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        self.assertEqual(p.replied_at.timetuple(), r.sent_at.timetuple())
+        self.assertEqual(p.replied_time.timetuple(), r.sent_time.timetuple())
 
         # a reply is withdrawn and no other reply
         r = copy.deepcopy(reply)
-        r.parent.replied_at = r.sent_at
+        r.parent.replied_time = r.sent_time
         r.moderation_status = STATUS_REJECTED  # could be STATUS_PENDING
-        # rejected -> rejected: no change. In real case, parent.replied_at would be already empty
+        # rejected -> rejected: no change. In real case, parent.replied_time would be already empty
         r.update_parent(STATUS_REJECTED)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        # pending -> rejected: no change. In real case, parent.replied_at would be already empty
+        # pending -> rejected: no change. In real case, parent.replied_time would be already empty
         r.update_parent(STATUS_PENDING)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
         # accepted -> rejected: parent is no more replied
@@ -1318,19 +1318,19 @@ class MessageTest(BaseTest):
         other_reply = Message.objects.create(subject='s', sender=self.user2, recipient=self.user1,
             parent=parent, thread=parent.thread, moderation_status=STATUS_ACCEPTED)
         r = copy.deepcopy(reply)
-        r.parent.replied_at = r.sent_at
+        r.parent.replied_time = r.sent_time
         r.moderation_status = STATUS_PENDING  # could be STATUS_REJECTED
-        # pending -> pending: no change. In real case, parent.replied_at would be from another reply object
+        # pending -> pending: no change. In real case, parent.replied_time would be from another reply object
         r.update_parent(STATUS_PENDING)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        # rejected -> pending: no change. In real case, parent.replied_at would be from another reply object
+        # rejected -> pending: no change. In real case, parent.replied_time would be from another reply object
         r.update_parent(STATUS_REJECTED)
         self.check_status(r.parent, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
         # accepted -> pending: parent is still replied but by another object
         r.update_parent(STATUS_ACCEPTED)
         p = Message.objects.get(pk=parent.pk)
         self.check_status(p, status=STATUS_ACCEPTED, thread=parent, is_replied=True)
-        self.assertEqual(p.replied_at.timetuple(), other_reply.sent_at.timetuple())
+        self.assertEqual(p.replied_time.timetuple(), other_reply.sent_time.timetuple())
         # note: accepted -> pending, with no other suitable reply
         # is covered in the accepted -> rejected case
 
@@ -1435,7 +1435,7 @@ class MessageTest(BaseTest):
             else:
                 changes['status'] = STATUS_REJECTED
                 changes['moderation_reason'] = result
-            m.sent_at = now()  # refresh, as we recycle the same base message
+            m.sent_time = now()  # refresh, as we recycle the same base message
             self.check_status(m, **changes)
 
     def test_auto_moderation(self):
@@ -1658,7 +1658,7 @@ class UtilsTest(BaseTest):
         "Test get_order_by()."
         self.assertEqual(get_order_by({}), None)
         self.assertEqual(get_order_by({ORDER_BY_KEY: 'f'}), 'sender__{0}'.format(get_user_model().USERNAME_FIELD))
-        self.assertEqual(get_order_by({ORDER_BY_KEY: 'D'}), '-sent_at')
+        self.assertEqual(get_order_by({ORDER_BY_KEY: 'D'}), '-sent_time')
 
     def test_get_user_representation(self):
         "Test get_user_representation()."
@@ -1700,8 +1700,8 @@ class ApiTest(BaseTest):
         pm_broadcast(sender=self.user1, recipients=self.user2, subject='s', body='b')
         m = Message.objects.get()
         self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True,
-            sender_archived=True, sender_deleted_at=True)
-        self.check_now(m.sender_deleted_at)
+            sender_archived=True, sender_deleted_time=True)
+        self.check_now(m.sender_deleted_time)
         self.check_now(m.moderation_date)
         self.check_message(m)
         self.assertEqual(len(mail.outbox), 1)
@@ -1742,8 +1742,8 @@ class ApiTest(BaseTest):
         "Test the auto_delete parameter."
         pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_delete=True)
         m = Message.objects.get()
-        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True, sender_deleted_at=True)
-        self.check_now(m.sender_deleted_at)
+        self.check_status(m, status=STATUS_ACCEPTED, moderation_date=True, sender_deleted_time=True)
+        self.check_now(m.sender_deleted_time)
 
     def test_pm_write_auto_moderators_accepted(self):
         "Test the auto_moderators parameter, moderate as accepted."
@@ -1762,7 +1762,7 @@ class ApiTest(BaseTest):
         "Test the auto_moderators parameter, moderate as rejected. Test the parameter as a tuple."
         pm_write(sender=self.user1, recipient=self.user2, subject='s', auto_moderators=(lambda m: False, ))
         m = Message.objects.get()
-        self.check_status(m, status=STATUS_REJECTED, moderation_date=True, recipient_deleted_at=True)
+        self.check_status(m, status=STATUS_REJECTED, moderation_date=True, recipient_deleted_time=True)
         self.check_now(m.moderation_date)
-        self.check_now(m.recipient_deleted_at)
+        self.check_now(m.recipient_deleted_time)
         self.assertEqual(len(mail.outbox), 0)  # sender is not notified in the case of auto moderation

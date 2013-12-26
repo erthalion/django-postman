@@ -116,7 +116,7 @@ class BaseWriteForm(forms.ModelForm):
         if parent and not parent.thread_id:  # at the very first reply, make it a conversation
             parent.thread = parent
             parent.save()
-            # but delay the setting of parent.replied_at to the moderation step
+            # but delay the setting of parent.replied_time to the moderation step
         if parent:
             self.instance.parent = parent
             self.instance.thread_id = parent.thread_id

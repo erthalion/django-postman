@@ -45,7 +45,7 @@ def pm_broadcast(sender, recipients, subject, body='', skip_notification=False):
         ``skip_notification``: if the normal notification event is not wished
     """
     message = Message(subject=subject, body=body, sender=sender,
-        sender_archived=True, sender_deleted_at=now(),
+        sender_archived=True, sender_deleted_time=now(),
         moderation_status=STATUS_ACCEPTED, moderation_date=now())
     if not isinstance(recipients, (tuple, list)):
         recipients = (recipients,)
@@ -82,7 +82,7 @@ def pm_write(sender, recipient, subject, body='', skip_notification=False,
     if auto_archive:
         message.sender_archived = True
     if auto_delete:
-        message.sender_deleted_at = now()
+        message.sender_deleted_time = now()
     message.save()
     if not skip_notification:
         message.notify_users(initial_status, _get_site())
