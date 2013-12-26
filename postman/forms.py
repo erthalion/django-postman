@@ -120,9 +120,6 @@ class BaseWriteForm(forms.ModelForm):
         if parent:
             self.instance.parent = parent
             self.instance.thread_id = parent.thread_id
-        initial_moderation = self.instance.get_moderation()
-        initial_dates = self.instance.get_dates()
-        initial_status = self.instance.moderation_status
         if recipient:
             if isinstance(recipient, get_user_model()) and recipient in recipients:
                 recipients.remove(recipient)
@@ -135,19 +132,10 @@ class BaseWriteForm(forms.ModelForm):
                 self.instance.recipient = None
                 self.instance.email = r
             self.instance.pk = None  # force_insert=True is not accessible from here
-            self.instance.auto_moderate(auto_moderators)
-            self.instance.clean_moderation(initial_status)
             self.instance.clean_for_visitor()
             m = super(BaseWriteForm, self).save()
-            if self.instance.is_rejected():
-                is_successful = False
-            self.instance.update_parent(initial_status)
-            self.instance.notify_users(initial_status, self.site)
-            # some resets for next reuse
             if not isinstance(r, get_user_model()):
                 self.instance.email = ''
-            self.instance.set_moderation(*initial_moderation)
-            self.instance.set_dates(*initial_dates)
         return is_successful
 
 

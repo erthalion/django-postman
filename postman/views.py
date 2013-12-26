@@ -165,7 +165,7 @@ class ComposeMixin(object):
                 'exchange_filter': self.exchange_filter,
                 'max': self.max,
                 'site': get_current_site(self.request),
-            })        
+            })
         return kwargs
 
     def get_success_url(self):
