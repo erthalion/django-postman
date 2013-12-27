@@ -316,12 +316,16 @@ class DisplayMixin(object):
         Message.objects.set_read(user, self.filter)
 
     def get(self, request, *args, **kwargs):
-        user = request.user
-        self.msgs = Message.objects.thread(user, self.filter)
-        if not self.msgs:
-            raise Http404
-        self.set_read(user)
-        return super(DisplayMixin, self).get(request, *args, **kwargs)
+        try:
+            user = request.user
+            self.msgs = Message.objects.thread(user, self.filter)
+            if not self.msgs:
+                raise Http404
+            return super(DisplayMixin, self).get(request, *args, **kwargs)
+        finally:
+            # set read_time after rendering
+            # so user can see unreaded message at the first time
+            self.set_read(user)
 
     def get_context_data(self, **kwargs):
         context = super(DisplayMixin, self).get_context_data(**kwargs)
@@ -414,12 +418,12 @@ class ArchiveView(UpdateMessageMixin, View):
 
 class DeleteView(UpdateMessageMixin, View):
     """Mark messages/conversations as deleted."""
-    field_bit = 'deleted_at'
+    field_bit = 'deleted_time'
     success_msg = lz_("Messages or conversations successfully deleted.")
     field_value = now()
 
 
 class UndeleteView(UpdateMessageMixin, View):
     """Revert messages/conversations from marked as deleted."""
-    field_bit = 'deleted_at'
+    field_bit = 'deleted_time'
     success_msg = lz_("Messages or conversations successfully recovered.")

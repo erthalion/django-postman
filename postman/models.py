@@ -86,7 +86,15 @@ class MessageManager(models.Manager):
                 lookups |= models.Q(**filter)
         else:
             lookups = models.Q(**filters)
-        return qs.filter(lookups)
+
+        if option != OPTION_MESSAGES:
+            # select only a last message in the thread (two separate sql requests)
+            last_in_thread = qs.filter(lookups).values('thread_id').annotate(models.Max('sid'), models.Max('sent_time'))
+            pks = [l['sid__max'] for l in last_in_thread]
+            return qs.filter(lookups & models.Q(**{'pk__in': pks}))
+        else:
+            # select all messages
+            return qs.filter(lookups)
 
     def inbox(self, user, related=True, **kwargs):
         """
@@ -219,7 +227,6 @@ class Message(models.Model):
     class Meta:
         verbose_name = _("message")
         verbose_name_plural = _("messages")
-        ordering = ['-sent_time', '-sid']
 
     def __unicode__(self):
         return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, Truncator(self.subject).words(5))
