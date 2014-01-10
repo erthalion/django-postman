@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import hashlib
+from datetime import datetime, timedelta
 
 from django.conf import settings
 try:
@@ -9,6 +10,7 @@ except ImportError:
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 try:
     from django.utils.text import Truncator  # Django 1.4
 except ImportError:
@@ -81,17 +83,19 @@ class MessageManager(models.Manager):
         if order_by:
             qs = qs.order_by(order_by)
         if isinstance(filters, (list, tuple)):
-            lookups = models.Q()
+            lookups = Q()
             for filter in filters:
-                lookups |= models.Q(**filter)
+                lookups |= Q(**filter)
         else:
-            lookups = models.Q(**filters)
+            lookups = Q(**filters)
 
         if option != OPTION_MESSAGES:
             # select only a last message in the thread (two separate sql requests)
-            last_in_thread = qs.filter(lookups).values('thread_id').annotate(models.Max('sid'), models.Max('sent_time'))
+            # or messages withour thread
+            last_in_thread = qs.filter(lookups).exclude(thread_id__isnull=True)\
+                                .values('thread_id').annotate(models.Max('sid'), models.Max('sent_time'))
             pks = [l['sid__max'] for l in last_in_thread]
-            return qs.filter(lookups & models.Q(**{'pk__in': pks}))
+            return qs.filter(lookups & (Q(pk__in=pks) | Q(thread_id__isnull=True)))
         else:
             # select all messages
             return qs.filter(lookups)
@@ -198,6 +202,19 @@ class MessageManager(models.Manager):
             recipient=user,
             read_time__isnull=True,
         ).update(read_time=now())
+
+    def last_messages(self, user, time_interval):
+        """ Return recently sent messages. There is no caching
+            because query depends on datetime.now(). Maybe some hacks
+            are needed to use cache?
+        Args:
+            user (schema.sharded.User): User who sent this messages
+            time_interval (int): Number of days for the time condition
+        Returns:
+            QuerySet: recently sent messages
+        """
+        return self.get_query_set().select_related('recipient')\
+                .filter(sender=user, sent_time__gte=datetime.now()-timedelta(days=time_interval))
 
 
 class Message(models.Model):
