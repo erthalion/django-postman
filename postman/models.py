@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import hashlib
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.conf import settings
 try:
@@ -214,7 +214,7 @@ class MessageManager(models.Manager):
             QuerySet: recently sent messages
         """
         return self.get_query_set().select_related('recipient')\
-                .filter(sender=user, sent_time__gte=datetime.now()-timedelta(days=time_interval))
+                .filter(sender=user, sent_time__gte=now()-timedelta(days=time_interval))
 
 
 class Message(models.Model):
