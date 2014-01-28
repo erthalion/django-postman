@@ -93,8 +93,8 @@ class MessageManager(models.Manager):
             # select only a last message in the thread (two separate sql requests)
             # or messages withour thread
             last_in_thread = qs.filter(lookups).exclude(thread_id__isnull=True)\
-                                .values('thread_id').annotate(models.Max('sid'), models.Max('sent_time'))
-            pks = [l['sid__max'] for l in last_in_thread]
+                                .values('thread_id').annotate(models.Max('id'), models.Max('sent_time'))
+            pks = [l['id__max'] for l in last_in_thread]
             return qs.filter(lookups & (Q(pk__in=pks) | Q(thread_id__isnull=True)))
         else:
             # select all messages
@@ -224,7 +224,6 @@ class Message(models.Model):
 
     SUBJECT_MAX_LENGTH = 120
 
-    sid = models.AutoField(primary_key=True)
     subject = models.CharField(_("subject"), max_length=SUBJECT_MAX_LENGTH)
     body = models.TextField(_("body"), blank=True)
     sender = models.ForeignKey(get_user_model(), related_name='sent_messages', null=True, blank=True, verbose_name=_("sender"))
