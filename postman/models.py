@@ -203,18 +203,27 @@ class MessageManager(models.Manager):
             read_time__isnull=True,
         ).update(read_time=now())
 
-    def last_messages(self, user, time_interval):
+    def last_messages(self, user, time_interval, recipient=None):
         """ Return recently sent messages. There is no caching
             because query depends on datetime.now(). Maybe some hacks
             are needed to use cache?
         Args:
-            user (schema.sharded.User): User who sent this messages
+            user (User): User who sent this messages
             time_interval (int): Number of days for the time condition
+        Kwargs:
+            recipient: (User) A message recipient
         Returns:
             QuerySet: recently sent messages
         """
-        return self.get_query_set().select_related('recipient')\
-                .filter(sender=user, sent_time__gte=now()-timedelta(days=time_interval))
+        conditions = {
+            'sender': user,
+            'sent_time__gte': now()-timedelta(days=time_interval),
+        }
+
+        if recipient is not None:
+            conditions['recipient'] = recipient
+
+        return self.get_query_set().select_related('recipient').filter(**conditions)
 
 
 class Message(models.Model):
