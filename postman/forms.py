@@ -145,7 +145,7 @@ class WriteForm(BaseWriteForm):
     recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), help_text='')
 
     class Meta(BaseWriteForm.Meta):
-        fields = ('recipients', 'subject', 'body')
+        fields = ('recipients', 'body')
 
 
 class AnonymousWriteForm(BaseWriteForm):
@@ -158,7 +158,7 @@ class AnonymousWriteForm(BaseWriteForm):
     recipients = CommaSeparatedUserField(label=(_("Recipients"), _("Recipient")), help_text='', max=1)  # one recipient is enough
 
     class Meta(BaseWriteForm.Meta):
-        fields = ('email', 'recipients', 'subject', 'body')
+        fields = ('email', 'recipients', 'body')
 
 
 class BaseReplyForm(BaseWriteForm):
@@ -196,4 +196,4 @@ class FullReplyForm(BaseReplyForm):
             label=(_("Additional recipients"), _("Additional recipient")), help_text='', required=False)
 
     class Meta(BaseReplyForm.Meta):
-        fields = (['recipients'] if allow_copies else []) + ['subject', 'body']
+        fields = (['recipients'] if allow_copies else []) + ['body', ]

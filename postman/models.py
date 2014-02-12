@@ -30,10 +30,9 @@ ORDER_BY_KEY = 'o'  # as 'order'
 ORDER_BY_FIELDS = {
     'f': 'sender__' + get_user_model().USERNAME_FIELD,     # as 'from'
     't': 'recipient__' + get_user_model().USERNAME_FIELD,  # as 'to'
-    's': 'subject',  # as 'subject'
     'd': 'sent_time',  # as 'date'
 }
-ORDER_BY_MAPPER = {'sender': 'f', 'recipient': 't', 'subject': 's', 'date': 'd'}  # for templatetags usage
+ORDER_BY_MAPPER = {'sender': 'f', 'recipient': 't', 'date': 'd'}  # for templatetags usage
 
 
 def get_order_by(query_dict):
@@ -233,7 +232,6 @@ class Message(models.Model):
 
     SUBJECT_MAX_LENGTH = 120
 
-    subject = models.CharField(_("subject"), max_length=SUBJECT_MAX_LENGTH)
     body = models.TextField(_("body"), blank=True)
     sender = models.ForeignKey(get_user_model(), related_name='sent_messages', null=True, blank=True, verbose_name=_("sender"))
     recipient = models.ForeignKey(get_user_model(), related_name='received_messages', null=True, blank=True, verbose_name=_("recipient"))
@@ -254,7 +252,7 @@ class Message(models.Model):
         verbose_name_plural = _("messages")
 
     def __unicode__(self):
-        return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient, Truncator(self.subject).words(5))
+        return "{0}>{1}:{2}".format(self.obfuscated_sender, self.obfuscated_recipient)
 
     def get_absolute_url(self):
         return reverse('postman_view', args=[self.pk])
@@ -340,10 +338,9 @@ class Message(models.Model):
         """Return the number of accepted responses."""
         return self.next_messages.count()
 
-    def quote(self, format_subject, format_body):
+    def quote(self, format_body):
         """Return a dictionary of quote values to initiate a reply."""
         return {
-            'subject': format_subject(self.subject)[:self.SUBJECT_MAX_LENGTH],
             'body': format_body(self.obfuscated_sender, self.body),
         }
 

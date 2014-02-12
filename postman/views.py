@@ -27,7 +27,7 @@ from . import OPTION_MESSAGES
 from .fields import autocompleter_app
 from .forms import WriteForm, AnonymousWriteForm, QuickReplyForm, FullReplyForm
 from .models import Message, get_order_by
-from .utils import format_subject, format_body
+from .utils import format_body
 
 login_required_m = method_decorator(login_required)
 csrf_protect_m = method_decorator(csrf_protect)
@@ -257,7 +257,7 @@ class ReplyView(ComposeMixin, FormView):
 
     """
     form_class = FullReplyForm
-    formatters = (format_subject, format_body)
+    formatters = (format_body, )
     autocomplete_channel = None
     template_name = 'postman/reply.html'
 
@@ -278,10 +278,6 @@ class ReplyView(ComposeMixin, FormView):
         kwargs = super(ReplyView, self).get_form_kwargs()
         kwargs['channel'] = self.autocomplete_channel
         if self.request.method == 'POST':
-            if 'subject' not in kwargs['data']:  # case of the quick reply form
-                post = kwargs['data'].copy()  # self.request.POST is immutable
-                post['subject'] = self.initial['subject']
-                kwargs['data'] = post
             kwargs['recipient'] = self.parent.sender or self.parent.email
         return kwargs
 
@@ -303,7 +299,7 @@ class DisplayMixin(object):
     """
     http_method_names = ['get']
     form_class = QuickReplyForm
-    formatters = (format_subject, format_body)
+    formatters = (format_body, )
     template_name = 'postman/view.html'
 
     @login_required_m
